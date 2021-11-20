@@ -1,4 +1,4 @@
-package com.example.test
+package com.insa.iss.safecityforcyclists
 
 import org.junit.Test
 
