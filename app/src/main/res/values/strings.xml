@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Safe City For Cyclists</string>
+    <!-- Jawg API constants -->
+    <string name="jawg_styles_url">https://api.jawg.io/styles/</string>
+    <!-- styles -->
+    <string-array name="jawg_styles">
+        <item>jawg-streets</item>
+        <item>jawg-terrain</item>
+        <item>jawg-sunny</item>
+        <item>jawg-dark</item>
+        <item>jawg-light</item>
+    </string-array>
 </resources>
