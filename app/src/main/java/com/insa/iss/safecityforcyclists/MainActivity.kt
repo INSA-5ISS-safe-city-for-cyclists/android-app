@@ -4,7 +4,6 @@ package com.insa.iss.safecityforcyclists
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.mapbox.geojson.Feature
@@ -79,7 +78,11 @@ class MainActivity : AppCompatActivity() {
                     if (features.isNotEmpty()) {
                         // get the first feature in the list
                         val feature: Feature = features[0]
-                        Toast.makeText(this, feature.properties().toString(), Toast.LENGTH_LONG).show()
+                        val bottomSheet = BottomSheetDialog(feature)
+                        bottomSheet.show(
+                            supportFragmentManager,
+                            "ModalBottomSheet"
+                        )
                     }
                     return@addOnMapClickListener true
                 }
