@@ -1,6 +1,6 @@
 {
   "version": 8,
-  "name": "osm-bright-cycleways",
+  "name": "osm_bright_cycleways",
   "metadata": {
     "mapbox:type": "template",
     "mapbox:groups": {
@@ -840,35 +840,6 @@
       }
     },
     {
-      "id": "highway-cycleways",
-      "type": "line",
-      "metadata": {"mapbox:group": "1444849345966.4436"},
-      "source": "default",
-      "source-layer": "transportation",
-      "filter": [
-        "all",
-        ["==", ["geometry-type"], "LineString"],
-        [
-          "any",
-          [
-            "match",
-            ["get", "bicycle"],
-            ["designated", "lane", "official", "permissive", "yes"],
-            true,
-            false
-          ],
-          [
-            "case",
-            ["==", ["typeof", ["get", "subclass"]], "string"],
-            ["==", ["get", "subclass"], "cycleway"],
-            false
-          ]
-        ]
-      ],
-      "layout": {"line-cap": "round", "line-join": "round"},
-      "paint": {"line-color": "rgba(41, 215, 108, 1)", "line-width": 5}
-    },
-    {
       "id": "highway-path",
       "type": "line",
       "metadata": {"mapbox:group": "1444849345966.4436"},
@@ -1056,6 +1027,35 @@
         "line-color": "#fc8",
         "line-width": {"base": 1.2, "stops": [[6.5, 0], [7, 0.5], [20, 18]]}
       }
+    },
+    {
+      "id": "highway-cycleways",
+      "type": "line",
+      "metadata": {"mapbox:group": "1444849345966.4436"},
+      "source": "default",
+      "source-layer": "transportation",
+      "filter": [
+        "all",
+        ["==", ["geometry-type"], "LineString"],
+        [
+          "any",
+          [
+            "match",
+            ["get", "bicycle"],
+            ["designated", "lane", "official", "permissive", "yes"],
+            true,
+            false
+          ],
+          [
+            "case",
+            ["==", ["typeof", ["get", "subclass"]], "string"],
+            ["==", ["get", "subclass"], "cycleway"],
+            false
+          ]
+        ]
+      ],
+      "layout": {"line-cap": "round", "line-join": "round"},
+      "paint": {"line-color": "rgba(41, 215, 108, 1)", "line-width": 2}
     },
     {
       "id": "railway-transit",
