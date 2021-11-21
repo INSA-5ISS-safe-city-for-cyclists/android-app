@@ -3,6 +3,7 @@ package com.insa.iss.safecityforcyclists
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.mapbox.geojson.Feature
@@ -26,6 +27,9 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.util.*
 
+
+
+
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val MARKER_ICON = "MARKER_ICON"
@@ -34,8 +38,8 @@ class MainActivity : AppCompatActivity() {
 
     private var mapView: MapView? = null
     private var symbolManager: SymbolManager? = null
-
     private var routing: Routing? = null
+    private var onBackPressedCallback: OnBackPressedCallback? = null
 
     private fun makeGeoapifyStyleUrl(style: String = "osm-carto"): String {
         return "${getString(R.string.geoapify_styles_url) + style}/style.json?apiKey=${getString(R.string.geoapify_access_token)}";
@@ -70,7 +74,7 @@ class MainActivity : AppCompatActivity() {
                 symbolManager = SymbolManager(mapView!!, map, style)
                 // Delete marker on click
                 symbolManager?.addClickListener { it ->
-                    removeMarker(it)
+                    removeRouteWaypoint(it)
                     true
                 }
                 val markerIconDrawable =
@@ -92,6 +96,16 @@ class MainActivity : AppCompatActivity() {
                     return@addOnMapClickListener true
                 }
                 routing = Routing(style, this, symbolManager?.layerId!!)
+
+                onBackPressedCallback = object : OnBackPressedCallback(
+                    false
+                ) {
+                    override fun handleOnBackPressed() {
+                        removeAllRouteWaypoints()
+                    }
+                }
+                onBackPressedDispatcher.addCallback(this, onBackPressedCallback!!)
+
             }
         }
     }
@@ -107,7 +121,7 @@ class MainActivity : AppCompatActivity() {
             val feature: Feature = features[0]
             showReportModal(feature)
         } else {
-            addRoutePoint(point)
+            addRouteWaypoint(point)
         }
     }
 
@@ -119,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun addRoutePoint(point: LatLng) {
+    private fun addRouteWaypoint(point: LatLng) {
         // Add marker at specified lat/lon.
         val newSymbol = symbolManager?.create(
             SymbolOptions()
@@ -137,20 +151,34 @@ class MainActivity : AppCompatActivity() {
             }
             else -> {
                 // If both markers are already present, delete and replace the end
-                removeMarker(routing?.endSymbol)
+                removeRouteWaypoint(routing?.endSymbol)
                 routing?.endSymbol = newSymbol
             }
         }
         symbolManager?.update(newSymbol)
+        updateOnBackPressedCallback()
     }
 
-    private fun removeMarker(it: Symbol?) {
+    private fun removeRouteWaypoint(it: Symbol?) {
+        if (it == null) {
+            return
+        }
         if (routing?.endSymbol == it) {
             routing?.endSymbol = null
         } else if (routing?.startSymbol == it) {
             routing?.startSymbol = null
         }
         symbolManager?.delete(it)
+        updateOnBackPressedCallback()
+    }
+
+    private fun removeAllRouteWaypoints() {
+        removeRouteWaypoint(routing?.endSymbol)
+        removeRouteWaypoint(routing?.startSymbol)
+    }
+
+    private fun updateOnBackPressedCallback() {
+        onBackPressedCallback?.isEnabled =  routing?.endSymbol != null || routing?.startSymbol != null
     }
 
     private fun addClusteredGeoJsonSource(loadedMapStyle: Style) {
