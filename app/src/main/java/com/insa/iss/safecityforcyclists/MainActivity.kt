@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mapbox.geojson.Feature
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private var onBackPressedCallback: OnBackPressedCallback? = null
     private var dangerReports: DangerReports? = null
     private var location: Location? = null
+    private var searchButton: FloatingActionButton? = null
 
     private fun makeGeoapifyStyleUrl(style: String = "osm-carto"): String {
         return "${getString(R.string.geoapify_styles_url) + style}/style.json?apiKey=${getString(R.string.geoapify_access_token)}";
@@ -101,7 +103,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 routing = Routing(style, this, symbolManager?.layerId!!, dangerReports!!)
 
-                location = Location(style, map, this)
+                location = Location(style, map, this, findViewById(R.id.gpsFAB))
                 location?.enableLocationComponent()
 
                 onBackPressedCallback = object : OnBackPressedCallback(

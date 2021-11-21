@@ -3,6 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/ic_baseline_gps_fixed_24.xml" value="0.15765765765765766" />
+        <entry key="app/src/main/res/drawable/ic_baseline_gps_not_fixed_24.xml" value="0.15765765765765766" />
+        <entry key="app/src/main/res/drawable/ic_baseline_gps_off_24.xml" value="0.15765765765765766" />
+        <entry key="app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.15765765765765766" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.15765765765765766" />
         <entry key="app/src/main/res/drawable/ic_marker.xml" value="0.15765765765765766" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.23369565217391305" />
       </map>

@@ -15,6 +15,36 @@
         mapbox:mapbox_cameraTargetLng="1.4530"
         mapbox:mapbox_cameraZoom="11"
         mapbox:mapbox_uiLogo="false"
-        mapbox:mapbox_uiAttribution="true"/>
+        mapbox:mapbox_uiAttribution="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/gpsFAB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="100dp"
+                android:clickable="true"
+                app:layout_constraintBottom_toTopOf="@+id/searchFAB"
+                app:layout_constraintEnd_toEndOf="parent"
+                mapbox:srcCompat="@drawable/ic_baseline_gps_off_24" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/searchFAB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="32dp"
+                android:clickable="true"
+                app:fabSize="normal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                mapbox:srcCompat="@drawable/ic_baseline_search_24" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.mapbox.mapboxsdk.maps.MapView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
