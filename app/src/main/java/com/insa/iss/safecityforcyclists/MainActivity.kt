@@ -1,25 +1,16 @@
 package com.insa.iss.safecityforcyclists
 
-import android.annotation.SuppressLint
 import android.graphics.PointF
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.mapbox.geojson.Feature
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.location.LocationComponent
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
-import com.mapbox.mapboxsdk.location.modes.CameraMode
-import com.mapbox.mapboxsdk.location.modes.RenderMode
-import com.mapbox.mapboxsdk.location.permissions.PermissionsListener
-import com.mapbox.mapboxsdk.location.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.maps.Style.OnStyleLoaded
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
@@ -29,7 +20,7 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils
 import java.util.*
 
 
-class MainActivity : AppCompatActivity(), PermissionsListener {
+class MainActivity : AppCompatActivity() {
     companion object {
         const val MARKER_ICON = "MARKER_ICON"
         private const val WAYPOINT_ICON = "WAYPOINT_ICON"
@@ -40,8 +31,8 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
     private var symbolManager: SymbolManager? = null
     private var routing: Routing? = null
     private var onBackPressedCallback: OnBackPressedCallback? = null
-    private var permissionsManager: PermissionsManager? = null
     private var dangerReports: DangerReports? = null
+    private var location: Location? = null
 
     private fun makeGeoapifyStyleUrl(style: String = "osm-carto"): String {
         return "${getString(R.string.geoapify_styles_url) + style}/style.json?apiKey=${getString(R.string.geoapify_access_token)}";
@@ -93,13 +84,18 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                         WAYPOINT_ICON,
                 BitmapUtils.getBitmapFromDrawable(waypointIconDrawable)!!
                 )
+
                 dangerReports = DangerReports(style);
                 dangerReports?.addClusteredGeoJsonSource()
+
                 map.addOnMapClickListener { point: LatLng ->
                     onMapClick(map, point)
                     return@addOnMapClickListener true
                 }
                 routing = Routing(style, this, symbolManager?.layerId!!)
+
+                location = Location(style, map, this)
+                location?.enableLocationComponent()
 
                 onBackPressedCallback = object : OnBackPressedCallback(
                     false
@@ -109,7 +105,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                     }
                 }
                 onBackPressedDispatcher.addCallback(this, onBackPressedCallback!!)
-                enableLocationComponent(style)
             }
         }
     }
@@ -185,53 +180,15 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         onBackPressedCallback?.isEnabled =  routing?.endSymbol != null || routing?.startSymbol != null
     }
 
-
-
-    @SuppressLint("MissingPermission")
-    private fun enableLocationComponent(loadedMapStyle: Style) {
-        // Check if permissions are enabled and if not request
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
-            // Get an instance of the component
-            val locationComponent: LocationComponent = mapboxMap?.locationComponent!!
-            // Activate with options
-            locationComponent.activateLocationComponent(
-                LocationComponentActivationOptions.builder(this, loadedMapStyle).build()
-            )
-            // Enable to make component visible
-            locationComponent.isLocationComponentEnabled = true
-            // Set the component's camera mode
-            locationComponent.cameraMode = CameraMode.TRACKING
-            // Set the component's render mode
-            locationComponent.renderMode = RenderMode.COMPASS
-        } else {
-            permissionsManager = PermissionsManager(this)
-            permissionsManager?.requestLocationPermissions(this)
-        }
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String?>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        permissionsManager?.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        location?.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    override fun onExplanationNeeded(permissionsToExplain: List<String?>?) {
-        Toast.makeText(this, R.string.user_location_permission_explanation, Toast.LENGTH_LONG)
-            .show()
-    }
-
-    override fun onPermissionResult(granted: Boolean) {
-        if (granted) {
-            mapboxMap?.getStyle(OnStyleLoaded { style -> enableLocationComponent(style) })
-        } else {
-            Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_LONG)
-                .show()
-            finish()
-        }
-    }
 
     override fun onStart() {
         super.onStart()
