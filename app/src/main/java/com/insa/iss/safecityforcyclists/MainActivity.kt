@@ -11,6 +11,9 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.expressions.Expression.*
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
@@ -26,9 +29,13 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val MARKER_ICON = "MARKER_ICON"
+        private const val WAYPOINT_ICON = "WAYPOINT_ICON"
     }
 
     private var mapView: MapView? = null
+    private var symbolManager: SymbolManager? = null
+
+    private var routing: Routing? = null
 
     private fun makeGeoapifyStyleUrl(style: String = "osm-carto"): String {
         return "${getString(R.string.geoapify_styles_url) + style}/style.json?apiKey=${getString(R.string.geoapify_access_token)}";
@@ -60,19 +67,31 @@ class MainActivity : AppCompatActivity() {
                 // Update attributions position
                 map.uiSettings.setAttributionMargins(15, 0, 0, 15)
 
-                // Choose logo to display
-                val selectedMarkerIconDrawable =
+                symbolManager = SymbolManager(mapView!!, map, style)
+                // Delete marker on click
+                symbolManager?.addClickListener { it ->
+                    removeMarker(it)
+                    true
+                }
+                val markerIconDrawable =
                     ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon, null)
+                val waypointIconDrawable =
+                    ResourcesCompat.getDrawable(this.resources, R.drawable.ic_waypoint_icon, null)
 
                 style.addImage(
                     MARKER_ICON,
-                    BitmapUtils.getBitmapFromDrawable(selectedMarkerIconDrawable)!!
+                    BitmapUtils.getBitmapFromDrawable(markerIconDrawable)!!,
+                )
+                style.addImage(
+                        WAYPOINT_ICON,
+                BitmapUtils.getBitmapFromDrawable(waypointIconDrawable)!!
                 )
                 addClusteredGeoJsonSource(style)
                 map.addOnMapClickListener { point: LatLng ->
                     onMapClick(map, point)
                     return@addOnMapClickListener true
                 }
+                routing = Routing(style, this, symbolManager?.layerId!!)
             }
         }
     }
@@ -86,12 +105,52 @@ class MainActivity : AppCompatActivity() {
         if (features.isNotEmpty()) {
             // get the first feature in the list
             val feature: Feature = features[0]
-            val bottomSheet = BottomSheetDialog(feature)
-            bottomSheet.show(
-                supportFragmentManager,
-                "ModalBottomSheet"
-            )
+            showReportModal(feature)
+        } else {
+            addRoutePoint(point)
         }
+    }
+
+    private fun showReportModal(feature: Feature) {
+        val bottomSheet = BottomSheetDialog(feature)
+        bottomSheet.show(
+            supportFragmentManager,
+            "ModalBottomSheet"
+        )
+    }
+
+    private fun addRoutePoint(point: LatLng) {
+        // Add marker at specified lat/lon.
+        val newSymbol = symbolManager?.create(
+            SymbolOptions()
+                .withLatLng(point)
+                .withIconImage(WAYPOINT_ICON)
+                .withIconSize(0.8f)
+                .withIconOffset(arrayOf(0f, -20f))
+        )
+        when {
+            routing?.startSymbol == null -> {
+                routing?.startSymbol = newSymbol
+            }
+            routing?.endSymbol == null -> {
+                routing?.endSymbol = newSymbol
+            }
+            else -> {
+                // If both markers are already present, delete and replace the end
+                removeMarker(routing?.endSymbol)
+                routing?.endSymbol = newSymbol
+            }
+        }
+        symbolManager?.update(newSymbol)
+    }
+
+    private fun removeMarker(it: Symbol?) {
+        if (routing?.endSymbol == it) {
+            routing?.endSymbol = null
+        } else if (routing?.startSymbol == it) {
+            routing?.startSymbol = null
+        }
+        symbolManager?.delete(it)
     }
 
     private fun addClusteredGeoJsonSource(loadedMapStyle: Style) {

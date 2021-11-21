@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Safe City For Cyclists</string>
     <string name="geoapify_styles_url">https://maps.geoapify.com/v1/styles/</string>
+    <string name="geoapify_routing_url">https://api.geoapify.com/v1/routing</string>
 </resources>
