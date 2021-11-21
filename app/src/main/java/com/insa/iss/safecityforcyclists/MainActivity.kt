@@ -1,6 +1,5 @@
 package com.insa.iss.safecityforcyclists
 
-
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Bundle
@@ -10,6 +9,7 @@ import com.mapbox.geojson.Feature
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.expressions.Expression.*
@@ -22,7 +22,6 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.*
-
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -45,12 +44,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Get the MapBox context
         Mapbox.getInstance(this)
-
         setContentView(R.layout.activity_main)
+        setupMap(savedInstanceState)
+    }
 
+    private fun setupMap(savedInstanceState: Bundle?) {
         // Create map view
         mapView = findViewById(R.id.mapView)
         mapView?.onCreate(savedInstanceState)
@@ -70,23 +70,27 @@ class MainActivity : AppCompatActivity() {
                 )
                 addClusteredGeoJsonSource(style)
                 map.addOnMapClickListener { point: LatLng ->
-                    // Get the clicked point coordinates
-                    val screenPoint: PointF = map.projection.toScreenLocation(point)
-                    // Query the source layer in that location
-                    val features: List<Feature> =
-                        map.queryRenderedFeatures(screenPoint, "unclustered-points")
-                    if (features.isNotEmpty()) {
-                        // get the first feature in the list
-                        val feature: Feature = features[0]
-                        val bottomSheet = BottomSheetDialog(feature)
-                        bottomSheet.show(
-                            supportFragmentManager,
-                            "ModalBottomSheet"
-                        )
-                    }
+                    onMapClick(map, point)
                     return@addOnMapClickListener true
                 }
             }
+        }
+    }
+
+    private fun onMapClick(map: MapboxMap, point: LatLng) {
+        // Get the clicked point coordinates
+        val screenPoint: PointF = map.projection.toScreenLocation(point)
+        // Query the source layer in that location
+        val features: List<Feature> =
+            map.queryRenderedFeatures(screenPoint, "unclustered-points")
+        if (features.isNotEmpty()) {
+            // get the first feature in the list
+            val feature: Feature = features[0]
+            val bottomSheet = BottomSheetDialog(feature)
+            bottomSheet.show(
+                supportFragmentManager,
+                "ModalBottomSheet"
+            )
         }
     }
 
