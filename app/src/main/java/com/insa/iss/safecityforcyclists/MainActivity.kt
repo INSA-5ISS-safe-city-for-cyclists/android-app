@@ -23,6 +23,7 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     companion object {
         const val MARKER_ICON = "MARKER_ICON"
+        const val WARNING_ICON = "WARNING_ICON"
         private const val WAYPOINT_ICON = "WAYPOINT_ICON"
     }
 
@@ -75,6 +76,8 @@ class MainActivity : AppCompatActivity() {
                     ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon, null)
                 val waypointIconDrawable =
                     ResourcesCompat.getDrawable(this.resources, R.drawable.ic_waypoint_icon, null)
+                val warningIconDrawable =
+                    ResourcesCompat.getDrawable(this.resources, R.drawable.ic_warning_icon, null)
 
                 style.addImage(
                     MARKER_ICON,
@@ -84,15 +87,19 @@ class MainActivity : AppCompatActivity() {
                         WAYPOINT_ICON,
                 BitmapUtils.getBitmapFromDrawable(waypointIconDrawable)!!
                 )
+                style.addImage(
+                    WARNING_ICON,
+                    BitmapUtils.getBitmapFromDrawable(warningIconDrawable)!!
+                )
 
-                dangerReports = DangerReports(style);
-                dangerReports?.addClusteredGeoJsonSource()
+                dangerReports = DangerReports(style, this);
+                dangerReports?.getGeoJsonData()
 
                 map.addOnMapClickListener { point: LatLng ->
                     onMapClick(map, point)
                     return@addOnMapClickListener true
                 }
-                routing = Routing(style, this, symbolManager?.layerId!!)
+                routing = Routing(style, this, symbolManager?.layerId!!, dangerReports!!)
 
                 location = Location(style, map, this)
                 location?.enableLocationComponent()

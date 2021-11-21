@@ -1,6 +1,8 @@
 package com.insa.iss.safecityforcyclists
 
+import android.app.Activity
 import android.graphics.Color
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
@@ -8,13 +10,30 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import java.net.URI
 import java.net.URISyntaxException
+import java.net.URL
+import kotlin.concurrent.thread
 
-class DangerReports(private val loadedMapStyle: Style) {
+class DangerReports(private val loadedMapStyle: Style, private val activity: Activity) {
     companion object {
         private const val CLUSTERS_SOURCE = "clusters"
         private const val UNCLUSTERED_LAYER = "unclustered-points"
+    }
+
+    var dangerReportsGeoJson: FeatureCollection? = null
+        private set
+
+    fun getGeoJsonData() {
+        thread {
+            val response =
+                URL("https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson").readText()
+            dangerReportsGeoJson = FeatureCollection.fromJson(response)
+            activity.runOnUiThread {
+                loadGeoJsonSource()
+                addUnclusteredLayer()
+                addClusteredLayers()
+            }
+        }
     }
 
     private fun loadGeoJsonSource() {
@@ -25,7 +44,7 @@ class DangerReports(private val loadedMapStyle: Style) {
                 // 12/22/15 to 1/21/16 as logged by USGS' Earthquake hazards program.
                 GeoJsonSource(
                     CLUSTERS_SOURCE,
-                    URI("https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson"),
+                    dangerReportsGeoJson,
                     GeoJsonOptions()
                         .withCluster(true)
                         .withClusterMaxZoom(14)
@@ -95,9 +114,4 @@ class DangerReports(private val loadedMapStyle: Style) {
         loadedMapStyle.addLayer(count)
     }
 
-    fun addClusteredGeoJsonSource() {
-        loadGeoJsonSource()
-        addUnclusteredLayer()
-        addClusteredLayers()
-    }
 }
