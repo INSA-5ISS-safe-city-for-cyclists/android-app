@@ -1029,32 +1029,49 @@
       }
     },
     {
+      "id": "highway-cycleways-shared",
+      "type": "line",
+      "metadata": {"mapbox:group": "1444849345966.4436"},
+      "source": "default",
+      "source-layer": "transportation",
+      "minzoom": 13,
+      "filter": [
+        "all",
+        ["==", ["geometry-type"], "LineString"],
+        [
+          "all",
+          ["==", ["get", "bicycle"], "yes"],
+          ["!=", ["get", "subclass"], "cycleway"]
+        ]
+      ],
+      "layout": {"line-cap": "round", "line-join": "round"},
+      "paint": {
+        "line-color": "rgba(41, 215, 108, 1)",
+        "line-width": 2,
+        "line-dasharray": [1, 5]
+      }
+    },
+    {
       "id": "highway-cycleways",
       "type": "line",
       "metadata": {"mapbox:group": "1444849345966.4436"},
       "source": "default",
       "source-layer": "transportation",
+      "minzoom": 13,
       "filter": [
         "all",
         ["==", ["geometry-type"], "LineString"],
         [
           "any",
-          [
-            "match",
-            ["get", "bicycle"],
-            ["designated", "lane", "official", "permissive", "yes"],
-            true,
-            false
-          ],
-          [
-            "case",
-            ["==", ["typeof", ["get", "subclass"]], "string"],
-            ["==", ["get", "subclass"], "cycleway"],
-            false
-          ]
+          ["==", ["get", "bicycle"], "designated"],
+          ["==", ["get", "subclass"], "cycleway"]
         ]
       ],
-      "layout": {"line-cap": "round", "line-join": "round"},
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round",
+        "visibility": "visible"
+      },
       "paint": {"line-color": "rgba(41, 215, 108, 1)", "line-width": 2}
     },
     {
