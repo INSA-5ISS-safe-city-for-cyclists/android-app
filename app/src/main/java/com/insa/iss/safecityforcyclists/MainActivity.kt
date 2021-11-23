@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mapbox.geojson.Feature
-import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -160,10 +159,10 @@ class MainActivity : AppCompatActivity() {
     private fun showWaypointModal(feature: Feature) {
         val bottomSheet = WaypointBottomSheetDialog(feature, { f ->
             val p = f.geometry() as Point
-            addRouteWaypoint(LatLng(p.latitude(), p.longitude()))
+            addRouteWaypoint(LatLng(p.latitude(), p.longitude()), true)
         }, { f ->
             val p = f.geometry() as Point
-            addRouteWaypoint(LatLng(p.latitude(), p.longitude()))
+            addRouteWaypoint(LatLng(p.latitude(), p.longitude()), false)
         })
         bottomSheet.show(
             supportFragmentManager,
@@ -171,42 +170,36 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun addRouteWaypoint(point: LatLng) {
-        // Add marker at specified lat/lon.
-        val newSymbol = symbolManager?.create(
+    private fun addRouteWaypoint(point: LatLng, isStart: Boolean) {
+        val newSymbol =symbolManager?.create(
             SymbolOptions()
                 .withLatLng(point)
                 .withIconImage(WAYPOINT_ICON)
                 .withIconSize(0.8f)
                 .withIconOffset(arrayOf(0f, -20f))
         )
-        when {
-            routing?.startSymbol == null -> {
-                routing?.startSymbol = newSymbol
-            }
-            routing?.endSymbol == null -> {
-                routing?.endSymbol = newSymbol
-            }
-            else -> {
-                // If both markers are already present, delete and replace the end
-                removeRouteWaypoint(routing?.endSymbol)
-                routing?.endSymbol = newSymbol
-            }
+        // Clear previous waypoint if any
+        if (isStart) {
+            removeRouteWaypoint(routing?.startSymbol)
+            routing?.startSymbol = newSymbol
+        } else {
+            removeRouteWaypoint(routing?.endSymbol)
+            routing?.endSymbol = newSymbol
         }
         symbolManager?.update(newSymbol)
         updateOnBackPressedCallback()
     }
 
-    private fun removeRouteWaypoint(it: Symbol?) {
-        if (it == null) {
+    private fun removeRouteWaypoint(symbol: Symbol?) {
+        if (symbol == null) {
             return
         }
-        if (routing?.endSymbol == it) {
+        if (routing?.endSymbol == symbol) {
             routing?.endSymbol = null
-        } else if (routing?.startSymbol == it) {
+        } else if (routing?.startSymbol == symbol) {
             routing?.startSymbol = null
         }
-        symbolManager?.delete(it)
+        symbolManager?.delete(symbol)
         updateOnBackPressedCallback()
     }
 

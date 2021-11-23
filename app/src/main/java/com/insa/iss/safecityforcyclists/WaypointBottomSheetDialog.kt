@@ -33,14 +33,12 @@ class WaypointBottomSheetDialog(private val feature: Feature, private val onRout
         title?.text = feature.properties()?.get("name")?.asString
 
         fromButton?.setOnClickListener {
-            println("from")
-            println(feature)
             onRouteFromClicked(feature)
+            dismiss()
         }
         toButton?.setOnClickListener {
-            println("to")
-            println(feature)
             onRouteToClicked(feature)
+            dismiss()
         }
     }
 }
