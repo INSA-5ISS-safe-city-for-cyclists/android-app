@@ -1,5 +1,6 @@
 package com.insa.iss.safecityforcyclists
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,7 @@ import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.mapbox.geojson.Feature
 
-class WaypointBottomSheetDialog(private val feature: Feature, private val onRouteFromClicked: (feature: Feature) -> Unit, private val onRouteToClicked: (feature: Feature) -> Unit) : BottomSheetDialogFragment() {
+class WaypointBottomSheetDialog(private val feature: Feature, private val onRouteFromClicked: () -> Unit, private val onRouteToClicked: () -> Unit, private val onDismiss: () -> Unit) : BottomSheetDialogFragment() {
     private var title: TextView? = null
     private var fromButton: Button? = null
     private var toButton: Button? = null
@@ -33,12 +34,17 @@ class WaypointBottomSheetDialog(private val feature: Feature, private val onRout
         title?.text = feature.properties()?.get("name")?.asString
 
         fromButton?.setOnClickListener {
-            onRouteFromClicked(feature)
+            onRouteFromClicked()
             dismiss()
         }
         toButton?.setOnClickListener {
-            onRouteToClicked(feature)
+            onRouteToClicked()
             dismiss()
         }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        onDismiss()
     }
 }

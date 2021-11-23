@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
 
                 routing = Routing(style, this, symbolManager?.layerId!!, dangerReports!!)
 
-                pinSelector = PinSelector(this, map, routing, symbolManager)
+                pinSelector = PinSelector(this, mapView!!, map, style, routing, symbolManager)
 
                 location = Location(style, map, this, findViewById(R.id.gpsFAB))
                 location?.enableLocationComponent()

@@ -6,14 +6,15 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.annotation.*
 
-class PinSelector(private val activity: AppCompatActivity, private val map: MapboxMap, private val routing: Routing?, private val symbolManager: SymbolManager?) {
+class PinSelector(private val activity: AppCompatActivity, mapView: MapView, private val map: MapboxMap, private val style: Style, private val routing: Routing?, private val symbolManager: SymbolManager?) {
 
     private var onBackPressedCallback: OnBackPressedCallback? = null
+    private var circleManager: CircleManager? = null
 
     init {
         onBackPressedCallback = object : OnBackPressedCallback(
@@ -23,6 +24,7 @@ class PinSelector(private val activity: AppCompatActivity, private val map: Mapb
                 removeAllRouteWaypoints()
             }
         }
+        circleManager = CircleManager(mapView, map, style)
         // Init callbacks
         activity.onBackPressedDispatcher.addCallback(activity, onBackPressedCallback!!)
         symbolManager?.addClickListener { it ->
@@ -79,13 +81,25 @@ class PinSelector(private val activity: AppCompatActivity, private val map: Mapb
     }
 
     private fun showWaypointModal(feature: Feature) {
-        val bottomSheet = WaypointBottomSheetDialog(feature, { f ->
-            val p = f.geometry() as Point
-            addRouteWaypoint(LatLng(p.latitude(), p.longitude()), true)
-        }, { f ->
-            val p = f.geometry() as Point
-            addRouteWaypoint(LatLng(p.latitude(), p.longitude()), false)
+        val p = feature.geometry() as Point
+        val point = LatLng(p.latitude(), p.longitude())
+        val bottomSheet = WaypointBottomSheetDialog(feature, {
+            addRouteWaypoint(point, true)
+        }, {
+            addRouteWaypoint(point, false)
+        }, {
+            circleManager?.deleteAll()
         })
+        circleManager?.deleteAll()
+        val newCircle = circleManager?.create(
+            CircleOptions()
+                .withLatLng(point)
+                .withCircleColor("#0000ff")
+                .withCircleOpacity(0.3f)
+                .withCircleRadius(15f)
+        )
+        circleManager?.update(newCircle)
+
         bottomSheet.show(
             activity.supportFragmentManager,
             "WaypointBottomSheet"
@@ -105,6 +119,7 @@ class PinSelector(private val activity: AppCompatActivity, private val map: Mapb
                 .withIconSize(0.8f)
                 .withIconOffset(arrayOf(0f, -20f))
         )
+
         // Clear previous waypoint if any
         if (isStart) {
             removeRouteWaypoint(routing?.startSymbol)
