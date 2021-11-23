@@ -1,23 +1,14 @@
 package com.insa.iss.safecityforcyclists
 
-import android.graphics.PointF
 import android.os.Bundle
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
-import com.mapbox.mapboxsdk.style.expressions.Expression.*
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.utils.BitmapUtils
 import java.util.*
 
@@ -26,22 +17,18 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val MARKER_ICON = "MARKER_ICON"
         const val WARNING_ICON = "WARNING_ICON"
-        private const val WAYPOINT_ICON = "WAYPOINT_ICON"
-        private const val DESTINATION_ICON = "DESTINATION_ICON"
+        const val WAYPOINT_ICON = "WAYPOINT_ICON"
+        const val DESTINATION_ICON = "DESTINATION_ICON"
     }
 
     private var mapView: MapView? = null
     private var mapboxMap: MapboxMap? = null
     private var symbolManager: SymbolManager? = null
     private var routing: Routing? = null
-    private var onBackPressedCallback: OnBackPressedCallback? = null
     private var dangerReports: DangerReports? = null
     private var location: Location? = null
+    private var pinSelector: PinSelector? = null
     private var searchButton: FloatingActionButton? = null
-
-    private fun makeGeoapifyStyleUrl(style: String = "osm-carto"): String {
-        return "${getString(R.string.geoapify_styles_url) + style}/style.json?apiKey=${getString(R.string.geoapify_access_token)}"
-    }
 
     private fun makeCustomGeoapifyStyle(): Style.Builder {
         val builder = Style.Builder()
@@ -70,169 +57,54 @@ class MainActivity : AppCompatActivity() {
                 // Update attributions position
                 map.uiSettings.setAttributionMargins(15, 0, 0, 15)
 
-                symbolManager = SymbolManager(mapView!!, map, style)
-                // Delete marker on click
-                symbolManager?.addClickListener { it ->
-                    removeRouteWaypoint(it)
-                    true
-                }
-                val markerIconDrawable =
-                    ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon, null)
-                val waypointIconDrawable =
-                    ResourcesCompat.getDrawable(this.resources, R.drawable.ic_waypoint_icon, null)
-                val destinationIconDrawable =
-                    ResourcesCompat.getDrawable(
-                        this.resources,
-                        R.drawable.ic_destination_icon,
-                        null
-                    )
-                val warningIconDrawable =
-                    ResourcesCompat.getDrawable(this.resources, R.drawable.ic_warning_icon, null)
+                addSymbolImages(style)
 
-                style.addImage(
-                    MARKER_ICON,
-                    BitmapUtils.getBitmapFromDrawable(markerIconDrawable)!!,
-                )
-                style.addImage(
-                    WAYPOINT_ICON,
-                    BitmapUtils.getBitmapFromDrawable(waypointIconDrawable)!!
-                )
-                style.addImage(
-                    DESTINATION_ICON,
-                    BitmapUtils.getBitmapFromDrawable(destinationIconDrawable)!!
-                )
-                style.addImage(
-                    WARNING_ICON,
-                    BitmapUtils.getBitmapFromDrawable(warningIconDrawable)!!
-                )
+                // Init classes
+                symbolManager = SymbolManager(mapView!!, map, style)
 
                 dangerReports = DangerReports(style, this)
                 dangerReports?.getGeoJsonData()
 
-                map.addOnMapClickListener { point: LatLng ->
-                    onMapClick(map, point)
-                    return@addOnMapClickListener true
-                }
-                map.addOnMapLongClickListener { point: LatLng ->
-                    onMapLongClick(point)
-                    return@addOnMapLongClickListener true
-                }
                 routing = Routing(style, this, symbolManager?.layerId!!, dangerReports!!)
+
+                pinSelector = PinSelector(this, map, routing, symbolManager)
 
                 location = Location(style, map, this, findViewById(R.id.gpsFAB))
                 location?.enableLocationComponent()
-
-                onBackPressedCallback = object : OnBackPressedCallback(
-                    false
-                ) {
-                    override fun handleOnBackPressed() {
-                        removeAllRouteWaypoints()
-                    }
-                }
-                onBackPressedDispatcher.addCallback(this, onBackPressedCallback!!)
             }
         }
     }
 
-    private fun onMapClick(map: MapboxMap, point: LatLng) {
-        // Get the clicked point coordinates
-        val screenPoint: PointF = map.projection.toScreenLocation(point)
-        // Query the source layer in that location
-        val reportsFeatures: List<Feature> =
-            map.queryRenderedFeatures(screenPoint, "unclustered-points")
-        if (reportsFeatures.isNotEmpty()) {
-            val feature: Feature = reportsFeatures[0]
-            showReportModal(feature)
-        } else {
-            val features: List<Feature> =
-                map.queryRenderedFeatures(
-                    screenPoint,
-                    "poi-level-3",
-                    "poi-level-2",
-                    "poi-level-1",
-                    "poi-railway"
-                )
-            println(features)
-            if (features.isNotEmpty()) {
-                val feature: Feature = features[0]
-                showWaypointModal(feature)
-            }
-        }
-    }
+    fun addSymbolImages(style: Style) {
+        val markerIconDrawable =
+            ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon, null)
+        val waypointIconDrawable =
+            ResourcesCompat.getDrawable(this.resources, R.drawable.ic_waypoint_icon, null)
+        val destinationIconDrawable =
+            ResourcesCompat.getDrawable(
+                this.resources,
+                R.drawable.ic_destination_icon,
+                null
+            )
+        val warningIconDrawable =
+            ResourcesCompat.getDrawable(this.resources, R.drawable.ic_warning_icon, null)
 
-    private fun onMapLongClick(point: LatLng) {
-        val feature = Feature.fromGeometry(Point.fromLngLat(point.longitude, point.latitude))
-        showWaypointModal(feature)
-    }
-
-    private fun showReportModal(feature: Feature) {
-        val bottomSheet = BottomSheetDialog(feature)
-        bottomSheet.show(
-            supportFragmentManager,
-            "ModalBottomSheet"
+        style.addImage(
+            MARKER_ICON,
+            BitmapUtils.getBitmapFromDrawable(markerIconDrawable)!!,
         )
-    }
-
-    private fun showWaypointModal(feature: Feature) {
-        val bottomSheet = WaypointBottomSheetDialog(feature, { f ->
-            val p = f.geometry() as Point
-            addRouteWaypoint(LatLng(p.latitude(), p.longitude()), true)
-        }, { f ->
-            val p = f.geometry() as Point
-            addRouteWaypoint(LatLng(p.latitude(), p.longitude()), false)
-        })
-        bottomSheet.show(
-            supportFragmentManager,
-            "WaypointBottomSheet"
+        style.addImage(
+            WAYPOINT_ICON,
+            BitmapUtils.getBitmapFromDrawable(waypointIconDrawable)!!
         )
-    }
-
-    private fun addRouteWaypoint(point: LatLng, isStart: Boolean) {
-        val icon = if (isStart) {
-            WAYPOINT_ICON
-        } else {
-            DESTINATION_ICON
-        }
-        val newSymbol = symbolManager?.create(
-            SymbolOptions()
-                .withLatLng(point)
-                .withIconImage(icon)
-                .withIconSize(0.8f)
-                .withIconOffset(arrayOf(0f, -20f))
+        style.addImage(
+            DESTINATION_ICON,
+            BitmapUtils.getBitmapFromDrawable(destinationIconDrawable)!!
         )
-        // Clear previous waypoint if any
-        if (isStart) {
-            removeRouteWaypoint(routing?.startSymbol)
-            routing?.startSymbol = newSymbol
-        } else {
-            removeRouteWaypoint(routing?.endSymbol)
-            routing?.endSymbol = newSymbol
-        }
-        symbolManager?.update(newSymbol)
-        updateOnBackPressedCallback()
-    }
-
-    private fun removeRouteWaypoint(symbol: Symbol?) {
-        if (symbol == null) {
-            return
-        }
-        if (routing?.endSymbol == symbol) {
-            routing?.endSymbol = null
-        } else if (routing?.startSymbol == symbol) {
-            routing?.startSymbol = null
-        }
-        symbolManager?.delete(symbol)
-        updateOnBackPressedCallback()
-    }
-
-    private fun removeAllRouteWaypoints() {
-        removeRouteWaypoint(routing?.endSymbol)
-        removeRouteWaypoint(routing?.startSymbol)
-    }
-
-    private fun updateOnBackPressedCallback() {
-        onBackPressedCallback?.isEnabled =
-            routing?.endSymbol != null || routing?.startSymbol != null
+        style.addImage(
+            WARNING_ICON,
+            BitmapUtils.getBitmapFromDrawable(warningIconDrawable)!!
+        )
     }
 
     override fun onRequestPermissionsResult(
