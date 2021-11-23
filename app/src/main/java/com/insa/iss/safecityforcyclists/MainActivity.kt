@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class MainActivity : AppCompatActivity() {
@@ -16,7 +15,6 @@ class MainActivity : AppCompatActivity() {
         const val DESTINATION_ICON = "DESTINATION_ICON"
     }
 
-    private var searchButton: FloatingActionButton? = null
     private var mapFragment: MapFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
