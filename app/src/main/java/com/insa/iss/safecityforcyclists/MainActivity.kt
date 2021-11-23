@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mapbox.geojson.Feature
+import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
@@ -101,6 +102,10 @@ class MainActivity : AppCompatActivity() {
                     onMapClick(map, point)
                     return@addOnMapClickListener true
                 }
+                map.addOnMapLongClickListener { point: LatLng ->
+                    onMapLongClick(point)
+                    return@addOnMapLongClickListener true
+                }
                 routing = Routing(style, this, symbolManager?.layerId!!, dangerReports!!)
 
                 location = Location(style, map, this, findViewById(R.id.gpsFAB))
@@ -122,15 +127,25 @@ class MainActivity : AppCompatActivity() {
         // Get the clicked point coordinates
         val screenPoint: PointF = map.projection.toScreenLocation(point)
         // Query the source layer in that location
-        val features: List<Feature> =
+        val reportsFeatures: List<Feature> =
             map.queryRenderedFeatures(screenPoint, "unclustered-points")
-        if (features.isNotEmpty()) {
-            // get the first feature in the list
-            val feature: Feature = features[0]
+        if (reportsFeatures.isNotEmpty()) {
+            val feature: Feature = reportsFeatures[0]
             showReportModal(feature)
         } else {
-            addRouteWaypoint(point)
+            val features: List<Feature> =
+                map.queryRenderedFeatures(screenPoint, "poi-level-3", "poi-level-2", "poi-level-1", "poi-railway")
+            println(features)
+            if (features.isNotEmpty()) {
+                val feature: Feature = features[0]
+                val p = feature.geometry() as Point
+                addRouteWaypoint(LatLng(p.latitude(), p.longitude()))
+            }
         }
+    }
+
+    private fun onMapLongClick(point: LatLng) {
+        addRouteWaypoint(point)
     }
 
     private fun showReportModal(feature: Feature) {
