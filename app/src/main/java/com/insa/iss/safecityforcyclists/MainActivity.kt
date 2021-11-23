@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         setContentView(R.layout.activity_main)
 
-        mapFragment = supportFragmentManager.findFragmentById(R.id.map_fragment_container_view) as MapFragment
+        mapFragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view) as MapFragment
 
         findViewById<SearchView>(R.id.searchView).apply {
             setIconifiedByDefault(false)
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
                 if (focused) {
                     supportFragmentManager.commit {
                         setReorderingAllowed(true)
-                        add<SearchFragment>(R.id.search_fragment_container_view)
+                        add<SearchFragment>(R.id.fragment_container_view)
                         addToBackStack("search")
                     }
 

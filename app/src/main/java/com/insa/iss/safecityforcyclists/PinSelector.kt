@@ -24,6 +24,14 @@ class PinSelector(private val activity: FragmentActivity, mapView: MapView, priv
                 removeAllRouteWaypoints()
             }
         }
+        activity.supportFragmentManager.addOnBackStackChangedListener {
+            // Ony enable custom back behavior if the map is displayed
+            if (activity.supportFragmentManager.backStackEntryCount == 0) {
+                updateOnBackPressedCallback()
+            } else {
+                onBackPressedCallback?.isEnabled = false
+            }
+        }
         circleManager = CircleManager(mapView, map, style)
         // Init callbacks
         activity.onBackPressedDispatcher.addCallback(activity, onBackPressedCallback!!)
@@ -150,7 +158,7 @@ class PinSelector(private val activity: FragmentActivity, mapView: MapView, priv
         removeRouteWaypoint(routing?.startSymbol)
     }
 
-    private fun updateOnBackPressedCallback() {
+    fun updateOnBackPressedCallback() {
         onBackPressedCallback?.isEnabled =
             routing?.endSymbol != null || routing?.startSymbol != null
     }

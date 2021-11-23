@@ -7,15 +7,10 @@
     tools:context=".MainActivity">
 
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/map_fragment_container_view"
+        android:id="@+id/fragment_container_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:name="com.insa.iss.safecityforcyclists.MapFragment" />
-
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/search_fragment_container_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
