@@ -27,17 +27,6 @@ class MainActivity : AppCompatActivity() {
         findViewById<SearchView>(R.id.searchView).apply {
             setIconifiedByDefault(false)
             queryHint = getString(R.string.search_hint)
-            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    println("Submit $query")
-                    return true
-                }
-
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    println("Change $query")
-                    return true
-                }
-            })
             setOnQueryTextFocusChangeListener { _, focused ->
                 if (focused) {
                     supportFragmentManager.commit {
