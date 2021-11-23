@@ -23,9 +23,9 @@
 [x] Show flag icon for destination
 [] Allow searching for a place from a search bar
 [] Select a place from search results
-[] Simple click to select a poi, long click to select coordinates anywhere
+[x] Simple click to select a poi, long click to select coordinates anywhere
 [] Use current position as start if available when choosing destination
-[] On click show a modal to ask "route from" or "route to"
+[x] On click show a modal to ask "route from" or "route to"
 
 ## Navigation mode
 
