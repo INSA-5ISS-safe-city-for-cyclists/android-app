@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mapbox.geojson.Feature
+import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -138,14 +139,14 @@ class MainActivity : AppCompatActivity() {
             println(features)
             if (features.isNotEmpty()) {
                 val feature: Feature = features[0]
-                val p = feature.geometry() as Point
-                addRouteWaypoint(LatLng(p.latitude(), p.longitude()))
+                showWaypointModal(feature)
             }
         }
     }
 
     private fun onMapLongClick(point: LatLng) {
-        addRouteWaypoint(point)
+        val feature = Feature.fromGeometry(Point.fromLngLat(point.latitude, point.longitude))
+        showWaypointModal(feature)
     }
 
     private fun showReportModal(feature: Feature) {
@@ -153,6 +154,20 @@ class MainActivity : AppCompatActivity() {
         bottomSheet.show(
             supportFragmentManager,
             "ModalBottomSheet"
+        )
+    }
+
+    private fun showWaypointModal(feature: Feature) {
+        val bottomSheet = WaypointBottomSheetDialog(feature, { f ->
+            val p = f.geometry() as Point
+            addRouteWaypoint(LatLng(p.latitude(), p.longitude()))
+        }, { f ->
+            val p = f.geometry() as Point
+            addRouteWaypoint(LatLng(p.latitude(), p.longitude()))
+        })
+        bottomSheet.show(
+            supportFragmentManager,
+            "WaypointBottomSheet"
         )
     }
 

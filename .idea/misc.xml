@@ -10,6 +10,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.15765765765765766" />
         <entry key="app/src/main/res/drawable/ic_marker.xml" value="0.15765765765765766" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.23369565217391305" />
+        <entry key="app/src/main/res/layout/waypoint_bottom_sheet_layout.xml" value="0.1453125" />
       </map>
     </option>
   </component>
