@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         // Get the MapBox context
         Mapbox.getInstance(this)
         setContentView(R.layout.activity_main)
@@ -75,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun addSymbolImages(style: Style) {
+    private fun addSymbolImages(style: Style) {
         val markerIconDrawable =
             ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon, null)
         val waypointIconDrawable =
