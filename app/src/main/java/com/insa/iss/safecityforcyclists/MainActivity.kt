@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         const val MARKER_ICON = "MARKER_ICON"
         const val WARNING_ICON = "WARNING_ICON"
         private const val WAYPOINT_ICON = "WAYPOINT_ICON"
+        private const val DESTINATION_ICON = "DESTINATION_ICON"
     }
 
     private var mapView: MapView? = null
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     private var searchButton: FloatingActionButton? = null
 
     private fun makeGeoapifyStyleUrl(style: String = "osm-carto"): String {
-        return "${getString(R.string.geoapify_styles_url) + style}/style.json?apiKey=${getString(R.string.geoapify_access_token)}";
+        return "${getString(R.string.geoapify_styles_url) + style}/style.json?apiKey=${getString(R.string.geoapify_access_token)}"
     }
 
     private fun makeCustomGeoapifyStyle(): Style.Builder {
@@ -79,6 +80,12 @@ class MainActivity : AppCompatActivity() {
                     ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon, null)
                 val waypointIconDrawable =
                     ResourcesCompat.getDrawable(this.resources, R.drawable.ic_waypoint_icon, null)
+                val destinationIconDrawable =
+                    ResourcesCompat.getDrawable(
+                        this.resources,
+                        R.drawable.ic_destination_icon,
+                        null
+                    )
                 val warningIconDrawable =
                     ResourcesCompat.getDrawable(this.resources, R.drawable.ic_warning_icon, null)
 
@@ -87,15 +94,19 @@ class MainActivity : AppCompatActivity() {
                     BitmapUtils.getBitmapFromDrawable(markerIconDrawable)!!,
                 )
                 style.addImage(
-                        WAYPOINT_ICON,
-                BitmapUtils.getBitmapFromDrawable(waypointIconDrawable)!!
+                    WAYPOINT_ICON,
+                    BitmapUtils.getBitmapFromDrawable(waypointIconDrawable)!!
+                )
+                style.addImage(
+                    DESTINATION_ICON,
+                    BitmapUtils.getBitmapFromDrawable(destinationIconDrawable)!!
                 )
                 style.addImage(
                     WARNING_ICON,
                     BitmapUtils.getBitmapFromDrawable(warningIconDrawable)!!
                 )
 
-                dangerReports = DangerReports(style, this);
+                dangerReports = DangerReports(style, this)
                 dangerReports?.getGeoJsonData()
 
                 map.addOnMapClickListener { point: LatLng ->
@@ -134,7 +145,13 @@ class MainActivity : AppCompatActivity() {
             showReportModal(feature)
         } else {
             val features: List<Feature> =
-                map.queryRenderedFeatures(screenPoint, "poi-level-3", "poi-level-2", "poi-level-1", "poi-railway")
+                map.queryRenderedFeatures(
+                    screenPoint,
+                    "poi-level-3",
+                    "poi-level-2",
+                    "poi-level-1",
+                    "poi-railway"
+                )
             println(features)
             if (features.isNotEmpty()) {
                 val feature: Feature = features[0]
@@ -144,7 +161,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onMapLongClick(point: LatLng) {
-        val feature = Feature.fromGeometry(Point.fromLngLat(point.latitude, point.longitude))
+        val feature = Feature.fromGeometry(Point.fromLngLat(point.longitude, point.latitude))
         showWaypointModal(feature)
     }
 
@@ -171,10 +188,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addRouteWaypoint(point: LatLng, isStart: Boolean) {
-        val newSymbol =symbolManager?.create(
+        val icon = if (isStart) {
+            WAYPOINT_ICON
+        } else {
+            DESTINATION_ICON
+        }
+        val newSymbol = symbolManager?.create(
             SymbolOptions()
                 .withLatLng(point)
-                .withIconImage(WAYPOINT_ICON)
+                .withIconImage(icon)
                 .withIconSize(0.8f)
                 .withIconOffset(arrayOf(0f, -20f))
         )
@@ -209,7 +231,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateOnBackPressedCallback() {
-        onBackPressedCallback?.isEnabled =  routing?.endSymbol != null || routing?.startSymbol != null
+        onBackPressedCallback?.isEnabled =
+            routing?.endSymbol != null || routing?.startSymbol != null
     }
 
     override fun onRequestPermissionsResult(
