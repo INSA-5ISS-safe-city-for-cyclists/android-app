@@ -2,7 +2,7 @@ package com.insa.iss.safecityforcyclists
 
 import android.graphics.PointF
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -11,7 +11,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.*
 
-class PinSelector(private val activity: AppCompatActivity, mapView: MapView, private val map: MapboxMap, private val style: Style, private val routing: Routing?, private val symbolManager: SymbolManager?) {
+class PinSelector(private val activity: FragmentActivity, mapView: MapView, private val map: MapboxMap, private val style: Style, private val routing: Routing?, private val symbolManager: SymbolManager?) {
 
     private var onBackPressedCallback: OnBackPressedCallback? = null
     private var circleManager: CircleManager? = null
