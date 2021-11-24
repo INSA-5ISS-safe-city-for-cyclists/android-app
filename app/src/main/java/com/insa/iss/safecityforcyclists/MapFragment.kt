@@ -4,13 +4,21 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.camera.CameraPosition
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.utils.BitmapUtils
 import java.util.*
+
+
+
 
 class MapFragment: Fragment(R.layout.map_fragment) {
 
@@ -21,6 +29,7 @@ class MapFragment: Fragment(R.layout.map_fragment) {
     private var dangerReports: DangerReports? = null
     private var location: Location? = null
     private var pinSelector: PinSelector? = null
+    private val viewModel: SearchResultsViewModel by activityViewModels()
 
     private fun makeCustomGeoapifyStyle(): Style.Builder {
         val builder = Style.Builder()
@@ -38,6 +47,26 @@ class MapFragment: Fragment(R.layout.map_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState) // Get the MapBox context
         setupMap(view, savedInstanceState)
+
+        viewModel.selected.observe(viewLifecycleOwner, { selected ->
+            println("selection changed to $selected")
+            println("selected item: ${selected?.let { viewModel.dataSet.value?.get(it) }}")
+            if (selected != null) {
+                val item = viewModel.dataSet.value?.get(selected)
+                if (item != null) {
+                    pinSelector?.showWaypointModal(item)
+                    val p = (item.geometry() as Point)
+                    val position = CameraPosition.Builder()
+                        .target(LatLng(p.latitude(), p.longitude()))
+                        .zoom(17.0)
+                        .build()
+                    mapboxMap?.animateCamera(
+                        CameraUpdateFactory
+                            .newCameraPosition(position), 7000
+                    )
+                }
+            }
+        })
     }
 
     private fun setupMap(view: View, savedInstanceState: Bundle?) {

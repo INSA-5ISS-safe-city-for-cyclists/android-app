@@ -2,6 +2,7 @@
     <string name="app_name">Safe City For Cyclists</string>
     <string name="geoapify_styles_url">https://maps.geoapify.com/v1/styles/</string>
     <string name="geoapify_routing_url">https://api.geoapify.com/v1/routing</string>
+    <string name="geoapify_autocomplete_url">https://api.geoapify.com/v1/geocode/autocomplete</string>
     <string name="user_location_permission_explanation">Voir la position sur la carte</string>
     <string name="user_location_permission_not_granted">Accès à la position refusé</string>
     <string name="search_hint">Rechercher…</string>

@@ -88,7 +88,7 @@ class PinSelector(private val activity: FragmentActivity, mapView: MapView, priv
         )
     }
 
-    private fun showWaypointModal(feature: Feature) {
+    fun showWaypointModal(feature: Feature) {
         val p = feature.geometry() as Point
         val point = LatLng(p.latitude(), p.longitude())
         val bottomSheet = WaypointBottomSheetDialog(feature, {

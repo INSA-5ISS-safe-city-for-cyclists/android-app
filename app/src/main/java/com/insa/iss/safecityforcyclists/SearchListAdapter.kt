@@ -1,16 +1,26 @@
 package com.insa.iss.safecityforcyclists
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.mapbox.geojson.Feature
 
 class SearchListAdapter :
     RecyclerView.Adapter<SearchListAdapter.ViewHolder>() {
 
-    private var dataSet = arrayOf(1, 2, 3)
+    var dataSet: List<Feature>? = null
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    var onItemPressedCallback: ((item: Feature, position: Int) -> Unit)? = null
+
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val searchListItemTitle: TextView = view.findViewById(R.id.searchListItemTitle)
@@ -24,11 +34,23 @@ class SearchListAdapter :
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        viewHolder.searchListItemTitle.text = dataSet[position].toString()
-        viewHolder.searchListItemContainer.setOnClickListener {
-            println("pressed" + dataSet[position].toString())
+        if (dataSet != null) {
+            val item = dataSet?.get(position)
+            if (item != null) {
+                viewHolder.searchListItemTitle.text = item.properties()?.get("formatted")?.asString ?: "ERROR"
+                viewHolder.searchListItemContainer.setOnClickListener {
+                    println("pressed $item")
+                    onItemPressedCallback?.invoke(item, position)
+                }
+            }
         }
     }
 
-    override fun getItemCount() = dataSet.size
+    override fun getItemCount(): Int {
+        return if (dataSet != null) {
+            dataSet!!.size
+        } else {
+            0
+        }
+    }
 }
