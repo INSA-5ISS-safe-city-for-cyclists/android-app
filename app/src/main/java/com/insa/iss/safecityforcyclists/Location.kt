@@ -2,6 +2,8 @@ package com.insa.iss.safecityforcyclists
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context.LOCATION_SERVICE
+import android.location.LocationManager
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -23,6 +25,7 @@ class Location(
     private var gpsButton: FloatingActionButton
 ) : PermissionsListener {
     private var permissionsManager: PermissionsManager? = null
+    private val locationManager = activity.getSystemService(LOCATION_SERVICE) as LocationManager
 
     private val gpsOffDrawable =
         ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_baseline_gps_off_24, null)
@@ -70,7 +73,19 @@ class Location(
                 }
             })
             gpsButton.setOnClickListener {
-                locationComponent.cameraMode = CameraMode.TRACKING
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    val lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    if (lastLocation != null) {
+                        locationComponent.cameraMode = CameraMode.TRACKING
+                    } else {
+                        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,  {
+                            locationComponent.cameraMode = CameraMode.TRACKING
+                        }, null)
+                        Toast.makeText(activity, "Location unknown", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(activity, "Location not enabled", Toast.LENGTH_SHORT).show()
+                }
             }
         } else {
             gpsButton.setImageDrawable(gpsOffDrawable)
