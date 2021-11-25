@@ -89,7 +89,7 @@ class MapFragment: Fragment(R.layout.map_fragment) {
                 dangerReports = DangerReports(style, requireActivity())
                 dangerReports?.getGeoJsonData()
 
-                routing = Routing(style, requireActivity(), symbolManager?.layerId!!, dangerReports!!)
+                routing = Routing(style, map, requireActivity(), symbolManager?.layerId!!, dangerReports!!)
 
                 pinSelector = PinSelector(requireActivity(), mapView!!, map, style, routing, symbolManager)
 

@@ -6,7 +6,10 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.MultiLineString
 import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol
 import com.mapbox.mapboxsdk.style.layers.FillLayer
@@ -23,8 +26,12 @@ import java.net.URL
 import java.net.URLEncoder
 import kotlin.concurrent.thread
 
+
+
+
 class Routing(
     private val loadedMapStyle: Style,
+    private val mapboxMap: MapboxMap,
     private val activity: Activity,
     private val symbolLayerId: String,
     private val dangerReports: DangerReports
@@ -40,6 +47,7 @@ class Routing(
     }
 
     var routeGeoJson: FeatureCollection? = null
+    var routeBounds: DoubleArray? = null
 
     var startSymbol: Symbol? = null
         set(value) {
@@ -75,17 +83,18 @@ class Routing(
         // Need to check if close to danger
 
         // Create a bounding box around the path with turf-bbox and turf-bbox-polygon
-        val bbox = TurfMeasurement.bbox(routeGeoJson)
+        routeBounds = TurfMeasurement.bbox(routeGeoJson)
         // Make the bounding box a bit bigger than the path (add some padding)
-        for (i in bbox.indices) {
+        for (i in routeBounds?.indices!!) {
             if (i < 2) {
-                bbox[i] -= 0.0008
+                routeBounds!![i] -= 0.0008
             } else {
-                bbox[i] += 0.0008
+                routeBounds!![i] += 0.0008
             }
+            println(routeBounds!![i])
         }
         // Find all the danger reports inside the box with turf-points-within-polygon
-        val polygon = TurfMeasurement.bboxPolygon(bbox)
+        val polygon = TurfMeasurement.bboxPolygon(routeBounds!!)
         showPathBoundingBox(polygon)
         val pointsInBox = TurfJoins.pointsWithinPolygon(
             dangerReports.dangerReportsGeoJson,
@@ -171,6 +180,14 @@ class Routing(
             lineJoin(LINE_JOIN_ROUND)
         )
         loadedMapStyle.addLayerBelow(routeLayer, symbolLayerId)
+        // Fit camera to route
+        if (routeBounds != null) {
+            val latLngBounds = LatLngBounds.Builder()
+                .include(LatLng(routeBounds!![1], routeBounds!![0]))
+                .include(LatLng(routeBounds!![3], routeBounds!![2]))
+                .build()
+            mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 0, 200, 0, 200), 1000)
+        }
     }
 
     private fun calculateRoute(start: LatLng?, end: LatLng?) {

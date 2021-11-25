@@ -14,7 +14,7 @@
 [x] Allow creating a bike route between 2 points
 [x] Detect if route goes near a danger
 [] Avoid dangerous zones if possible
-[] Fit route in viewport when calculated
+[x] Fit route in viewport when calculated
 [] Show route summary when calculated (time, distance, number of dangers, start button)
 
 ## Waypoints
