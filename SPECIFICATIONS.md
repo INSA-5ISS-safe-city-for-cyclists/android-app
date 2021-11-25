@@ -56,6 +56,7 @@
 [] Show recap modal with the list of reports to upload
 [] Clicking on a report in the list will lower the modal and select the report on the map
 [] Allow removing selected local report
-[] Clear local database on upload
+[] Remove uploaded reports database
+[] Remove non-dangerous reports (2 weeks) on start
 
 
