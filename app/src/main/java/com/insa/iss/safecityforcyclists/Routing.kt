@@ -66,7 +66,7 @@ class Routing(
             val response = URL(getApiCall(start, end)).readText()
             routeGeoJson = FeatureCollection.fromJson(response)
             activity.runOnUiThread {
-                renderRoute(start, end)
+                renderRoute()
             }
         }
     }
@@ -87,12 +87,16 @@ class Routing(
         // Find all the danger reports inside the box with turf-points-within-polygon
         val polygon = TurfMeasurement.bboxPolygon(bbox)
         showPathBoundingBox(polygon)
-        val pointsInBox = TurfJoins.pointsWithinPolygon(dangerReports.dangerReportsGeoJson, FeatureCollection.fromFeature(polygon))
+        val pointsInBox = TurfJoins.pointsWithinPolygon(
+            dangerReports.dangerReportsGeoJson,
+            FeatureCollection.fromFeature(polygon)
+        )
         println("Points in box")
         println(pointsInBox)
         // For each danger in the box, find the closest point to the line with turf-nearest-point-on-line
         val pointsFeatures = pointsInBox.features()
-        val routePoints = (routeGeoJson?.features()?.get(0)?.geometry() as MultiLineString).coordinates()[0]
+        val routePoints =
+            (routeGeoJson?.features()?.get(0)?.geometry() as MultiLineString).coordinates()[0]
         if (pointsFeatures != null && routePoints != null) {
             val nearestPoints: Array<Feature?> = arrayOfNulls(pointsFeatures.size)
             for ((i, f) in pointsFeatures.withIndex()) {
@@ -149,7 +153,7 @@ class Routing(
         loadedMapStyle.addLayerBelow(polygonLayer, symbolLayerId)
     }
 
-    private fun renderRoute(start: LatLng, end: LatLng) {
+    private fun renderRoute() {
         // Add the route geojson as data source
         val route = GeoJsonSource(
             ROUTE_SOURCE,

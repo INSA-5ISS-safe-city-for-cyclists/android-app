@@ -11,7 +11,14 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.*
 
-class PinSelector(private val activity: FragmentActivity, mapView: MapView, private val map: MapboxMap, private val style: Style, private val routing: Routing?, private val symbolManager: SymbolManager?) {
+class PinSelector(
+    private val activity: FragmentActivity,
+    mapView: MapView,
+    private val map: MapboxMap,
+    style: Style,
+    private val routing: Routing?,
+    private val symbolManager: SymbolManager?
+) {
 
     private var onBackPressedCallback: OnBackPressedCallback? = null
     private var circleManager: CircleManager? = null
@@ -158,7 +165,7 @@ class PinSelector(private val activity: FragmentActivity, mapView: MapView, priv
         removeRouteWaypoint(routing?.startSymbol)
     }
 
-    fun updateOnBackPressedCallback() {
+    private fun updateOnBackPressedCallback() {
         onBackPressedCallback?.isEnabled =
             routing?.endSymbol != null || routing?.startSymbol != null
     }
