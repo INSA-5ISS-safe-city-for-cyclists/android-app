@@ -1,10 +1,13 @@
 package com.insa.iss.safecityforcyclists
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.add
+import androidx.fragment.app.commit
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraPosition
@@ -18,9 +21,7 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils
 import java.util.*
 
 
-
-
-class MapFragment: Fragment(R.layout.map_fragment) {
+class MapFragment : Fragment(R.layout.map_fragment) {
 
     private var mapView: MapView? = null
     private var mapboxMap: MapboxMap? = null
@@ -30,6 +31,7 @@ class MapFragment: Fragment(R.layout.map_fragment) {
     private var location: Location? = null
     private var pinSelector: PinSelector? = null
     private val viewModel: SearchResultsViewModel by activityViewModels()
+    private val routeViewModel: RouteViewModel by activityViewModels()
 
     private fun makeCustomGeoapifyStyle(): Style.Builder {
         val builder = Style.Builder()
@@ -78,7 +80,8 @@ class MapFragment: Fragment(R.layout.map_fragment) {
             map.setStyle(makeCustomGeoapifyStyle()) { style ->
                 // Map fully loaded in this scope.
                 // Update attributions position
-                map.uiSettings.setAttributionMargins(15, 0, 0, 15)
+                map.uiSettings.attributionGravity = Gravity.TOP
+                map.uiSettings.setAttributionMargins(15, 250, 0, 0)
                 map.uiSettings.setCompassMargins(0, 250, 50, 0)
 
                 addSymbolImages(style)
@@ -89,14 +92,37 @@ class MapFragment: Fragment(R.layout.map_fragment) {
                 dangerReports = DangerReports(style, requireActivity())
                 dangerReports?.getGeoJsonData()
 
-                routing = Routing(style, map, requireActivity(), symbolManager?.layerId!!, dangerReports!!)
+                routing = Routing(
+                    style,
+                    map,
+                    requireActivity(),
+                    symbolManager?.layerId!!,
+                    dangerReports!!,
+                    routeViewModel
+                )
 
-                pinSelector = PinSelector(requireActivity(), mapView!!, map, style, routing, symbolManager)
+                pinSelector =
+                    PinSelector(requireActivity(), mapView!!, map, style, routing, symbolManager)
 
                 location = Location(style, map, requireActivity(), view.findViewById(R.id.gpsFAB))
                 location?.enableLocationComponent()
             }
         }
+        routeViewModel.routeGeoJson.observe(viewLifecycleOwner, { routeGeoJson ->
+            if (routeGeoJson != null) {
+                requireActivity().supportFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    add<RouteSummaryFragment>(R.id.summary_fragment_container_view)
+                }
+            } else {
+                requireActivity().supportFragmentManager.findFragmentById(R.id.summary_fragment_container_view)
+                    ?.let {
+                        requireActivity().supportFragmentManager.commit {
+                            remove(it)
+                        }
+                    }
+            }
+        })
     }
 
     private fun addSymbolImages(style: Style) {

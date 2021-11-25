@@ -12,6 +12,7 @@
         <entry key="app/src/main/res/drawable/ic_marker.xml" value="0.15765765765765766" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.23369565217391305" />
         <entry key="app/src/main/res/layout/map_fragment.xml" value="0.16306306306306306" />
+        <entry key="app/src/main/res/layout/route_summary.xml" value="0.264" />
         <entry key="app/src/main/res/layout/search_fragment.xml" value="0.26981981981981984" />
         <entry key="app/src/main/res/layout/search_list_item.xml" value="0.6" />
       </map>

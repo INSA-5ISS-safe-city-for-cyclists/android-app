@@ -34,7 +34,8 @@ class Routing(
     private val mapboxMap: MapboxMap,
     private val activity: Activity,
     private val symbolLayerId: String,
-    private val dangerReports: DangerReports
+    private val dangerReports: DangerReports,
+    private val routeViewModel: RouteViewModel
 ) {
     companion object {
         private const val ROUTE_SOURCE = "route_source"
@@ -45,9 +46,7 @@ class Routing(
         private const val DANGER_LAYER = "danger_layer"
         private const val MIN_DANGER_DISTANCE = 50 // in meters
     }
-
-    var routeGeoJson: FeatureCollection? = null
-    var routeBounds: DoubleArray? = null
+    private var routeBounds: DoubleArray? = null
 
     var startSymbol: Symbol? = null
         set(value) {
@@ -72,8 +71,8 @@ class Routing(
     private fun getGeoJsonData(start: LatLng, end: LatLng) {
         thread {
             val response = URL(getApiCall(start, end)).readText()
-            routeGeoJson = FeatureCollection.fromJson(response)
             activity.runOnUiThread {
+                routeViewModel.routeGeoJson.value = FeatureCollection.fromJson(response)
                 renderRoute()
             }
         }
@@ -83,7 +82,7 @@ class Routing(
         // Need to check if close to danger
 
         // Create a bounding box around the path with turf-bbox and turf-bbox-polygon
-        routeBounds = TurfMeasurement.bbox(routeGeoJson)
+        routeBounds = TurfMeasurement.bbox(routeViewModel.routeGeoJson.value)
         // Make the bounding box a bit bigger than the path (add some padding)
         for (i in routeBounds?.indices!!) {
             if (i < 2) {
@@ -105,7 +104,7 @@ class Routing(
         // For each danger in the box, find the closest point to the line with turf-nearest-point-on-line
         val pointsFeatures = pointsInBox.features()
         val routePoints =
-            (routeGeoJson?.features()?.get(0)?.geometry() as MultiLineString).coordinates()[0]
+            (routeViewModel.routeGeoJson.value?.features()?.get(0)?.geometry() as MultiLineString).coordinates()[0]
         if (pointsFeatures != null && routePoints != null) {
             val nearestPoints: Array<Feature?> = arrayOfNulls(pointsFeatures.size)
             for ((i, f) in pointsFeatures.withIndex()) {
@@ -166,7 +165,7 @@ class Routing(
         // Add the route geojson as data source
         val route = GeoJsonSource(
             ROUTE_SOURCE,
-            routeGeoJson
+            routeViewModel.routeGeoJson.value
         )
         loadedMapStyle.addSource(route)
         detectDangerousZones()
@@ -186,7 +185,7 @@ class Routing(
                 .include(LatLng(routeBounds!![1], routeBounds!![0]))
                 .include(LatLng(routeBounds!![3], routeBounds!![2]))
                 .build()
-            mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 0, 200, 0, 200), 1000)
+            mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 0, 250, 0, 200), 1000)
         }
     }
 
@@ -209,6 +208,7 @@ class Routing(
         if (loadedMapStyle.getLayer(DANGER_LAYER) != null) {
             loadedMapStyle.removeLayer(DANGER_LAYER)
         }
+        routeViewModel.routeGeoJson.value = null
         if (start != null && end != null) {
             getGeoJsonData(start, end)
         }

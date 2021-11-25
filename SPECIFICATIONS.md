@@ -15,7 +15,7 @@
 [x] Detect if route goes near a danger
 [] Avoid dangerous zones if possible
 [x] Fit route in viewport when calculated
-[] Show route summary when calculated (time, distance, number of dangers, start button)
+[x] Show route summary when calculated (time, distance, number of dangers, start button)
 
 ## Waypoints
 
