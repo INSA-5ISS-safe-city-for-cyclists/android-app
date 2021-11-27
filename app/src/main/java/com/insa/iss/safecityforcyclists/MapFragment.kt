@@ -105,6 +105,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                     PinSelector(requireActivity(), mapView!!, map, style, routing, symbolManager)
 
                 location = Location(style, map, requireActivity(), view.findViewById(R.id.gpsFAB))
+                location?.onResume()
                 location?.enableLocationComponent()
             }
         }
@@ -174,6 +175,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     override fun onResume() {
         super.onResume()
         mapView?.onResume()
+        location?.onResume()
     }
 
     override fun onPause() {
@@ -199,5 +201,6 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     override fun onDestroy() {
         super.onDestroy()
         mapView?.onDestroy()
+        location?.onDestroy()
     }
 }
