@@ -92,21 +92,22 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 dangerReports = DangerReports(style, requireActivity())
                 dangerReports?.getGeoJsonData()
 
+                location = Location(style, map, requireActivity(), view.findViewById(R.id.gpsFAB))
+                location?.onResume()
+                location?.enableLocationComponent()
+
                 routing = Routing(
                     style,
                     map,
                     requireActivity(),
                     symbolManager?.layerId!!,
                     dangerReports!!,
+                    location!!,
                     routeViewModel
                 )
 
                 pinSelector =
                     PinSelector(requireActivity(), mapView!!, map, style, routing, symbolManager)
-
-                location = Location(style, map, requireActivity(), view.findViewById(R.id.gpsFAB))
-                location?.onResume()
-                location?.enableLocationComponent()
             }
         }
         routeViewModel.routeGeoJson.observe(viewLifecycleOwner, { routeGeoJson ->

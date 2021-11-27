@@ -24,7 +24,7 @@
 [x] Allow searching for a place from a search bar
 [x] Select a place from search results
 [x] Simple click to select a poi, long click to select coordinates anywhere
-[] Use current position as start if available when choosing destination
+[x] Use current position as start if available when choosing destination
 [x] On click show a modal to ask "route from" or "route to"
 
 ## Navigation mode

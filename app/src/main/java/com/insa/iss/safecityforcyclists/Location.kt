@@ -45,13 +45,13 @@ class Location(
         ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_baseline_gps_fixed_24, null)
 
     private var locationComponent: LocationComponent? = null
-    private var lastLocation: android.location.Location? = null
-    private var signalLost = false
+    var lastLocation: android.location.Location? = null
+        private set
 
     private val gpsSwitchStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             if (intent.action!! == "android.location.PROVIDERS_CHANGED") {
-                updateGpsButton()
+                updateLocationComponent()
             }
         }
     }
@@ -59,13 +59,14 @@ class Location(
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: android.location.Location) {
             // If 2 locations next to each other are the same, consider the signal lost
-            signalLost = lastLocation?.equals(location) == true
+            val signalLost = lastLocation?.equals(location) == true
             lastLocation = location
-            println("" + location.longitude + ":" + location.latitude)
+            println("New location: " + location.longitude + ":" + location.latitude)
             if (signalLost) {
                 println("GPS signal lost !")
-                updateGpsButton()
+                lastLocation = null
             }
+            updateLocationComponent()
         }
 
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
@@ -75,15 +76,43 @@ class Location(
 
     @SuppressLint("MissingPermission")
     fun enableLocationComponent() {
-        updateGpsButton()
+        // Get an instance of the component
+        locationComponent = mapboxMap?.locationComponent!!
+        // Activate with options
+        val locationComponentOptions = LocationComponentOptions.builder(activity)
+            .trackingGesturesManagement(true)
+            .enableStaleState(false)
+            .build()
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0f, locationListener)
+        locationComponent?.activateLocationComponent(
+            LocationComponentActivationOptions
+                .builder(activity, loadedMapStyle)
+                .locationComponentOptions(locationComponentOptions)
+                .build()
+        )
+        // Set the component's camera mode
+        locationComponent?.cameraMode = CameraMode.TRACKING
+        // Set the component's render mode
+        locationComponent?.renderMode = RenderMode.COMPASS
+        locationComponent?.addOnCameraTrackingChangedListener(object :
+            OnCameraTrackingChangedListener {
+            override fun onCameraTrackingDismissed() {
+                gpsButton.setImageDrawable(gpsNotFixedDrawable)
+            }
+            override fun onCameraTrackingChanged(currentMode: Int) {
+                gpsButton.setImageDrawable(gpsFixedDrawable)
+            }
+        })
+
+        updateLocationComponent()
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0f, locationListener)
 
         gpsButton.setOnClickListener {
             if (!PermissionsManager.areLocationPermissionsGranted(activity)) {
                 permissionsManager.requestLocationPermissions(activity)
             } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                if (lastLocation != null && !signalLost) {
+                if (lastLocation != null) {
                     locationComponent?.cameraMode = CameraMode.TRACKING
                 } else {
                     locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,  {
@@ -97,48 +126,26 @@ class Location(
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun updateGpsButton() {
-        if (PermissionsManager.areLocationPermissionsGranted(activity) && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !signalLost) {
-            gpsButton.setImageDrawable(gpsNotFixedDrawable)
-            // Get an instance of the component
-            locationComponent = mapboxMap?.locationComponent!!
-            // Activate with options
-            val locationComponentOptions = LocationComponentOptions.builder(activity)
-                .trackingGesturesManagement(true)
-                .enableStaleState(false)
-                .build()
-
-            locationComponent?.activateLocationComponent(
-                LocationComponentActivationOptions
-                    .builder(activity, loadedMapStyle)
-                    .locationComponentOptions(locationComponentOptions)
-                    .build()
-            )
-
-
-            // Enable to make component visible
-            locationComponent?.isLocationComponentEnabled = true
-            // Set the component's camera mode
-            locationComponent?.cameraMode = CameraMode.TRACKING
-            // Set the component's render mode
-            locationComponent?.renderMode = RenderMode.COMPASS
-
-            locationComponent?.addOnCameraTrackingChangedListener(object :
-                OnCameraTrackingChangedListener {
-                override fun onCameraTrackingDismissed() {
-                    gpsButton.setImageDrawable(gpsNotFixedDrawable)
-                }
-                override fun onCameraTrackingChanged(currentMode: Int) {
-                    gpsButton.setImageDrawable(gpsFixedDrawable)
-                }
-            })
+    private fun checkPermissions() : Boolean {
+        return if (PermissionsManager.areLocationPermissionsGranted(activity) && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            true
         } else {
-            gpsButton.setImageDrawable(gpsOffDrawable)
-            locationComponent?.isLocationComponentEnabled = false
+            lastLocation = null
             if (!PermissionsManager.areLocationPermissionsGranted(activity)) {
                 permissionsManager.requestLocationPermissions(activity)
             }
+            false
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun updateLocationComponent() {
+        if (checkPermissions()) {
+            gpsButton.setImageDrawable(gpsNotFixedDrawable)
+            locationComponent?.isLocationComponentEnabled = lastLocation != null
+        } else {
+            gpsButton.setImageDrawable(gpsOffDrawable)
+            locationComponent?.isLocationComponentEnabled = false
         }
     }
 

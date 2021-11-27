@@ -35,6 +35,7 @@ class Routing(
     private val activity: Activity,
     private val symbolLayerId: String,
     private val dangerReports: DangerReports,
+    private val location: Location,
     private val routeViewModel: RouteViewModel
 ) {
     companion object {
@@ -211,6 +212,8 @@ class Routing(
         routeViewModel.routeGeoJson.value = null
         if (start != null && end != null) {
             getGeoJsonData(start, end)
+        } else if (end != null && location.lastLocation != null) {
+            getGeoJsonData(LatLng(location.lastLocation!!.latitude, location.lastLocation!!.longitude) ,end)
         }
     }
 
