@@ -1,5 +1,6 @@
 package com.insa.iss.safecityforcyclists.reports
 
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.mapbox.geojson.FeatureCollection
 import kotlinx.coroutines.Dispatchers
@@ -7,7 +8,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
 
-class RemoteDangerReportsViewModel : DangerReportsViewModel() {
+class RemoteDangerReportsViewModel(application: Application) : DangerReportsViewModel(application) {
 
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun makeRequest(): FeatureCollection {

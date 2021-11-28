@@ -48,4 +48,11 @@ dependencies {
     implementation 'org.maplibre.gl:android-sdk:9.5.1'
     implementation 'org.maplibre.gl:android-plugin-annotation-v9:1.0.0'
     implementation 'org.maplibre.gl:android-sdk-turf:5.9.0'
+
+
+    def room_version = "2.3.0"
+    implementation "androidx.room:room-runtime:room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
 }
