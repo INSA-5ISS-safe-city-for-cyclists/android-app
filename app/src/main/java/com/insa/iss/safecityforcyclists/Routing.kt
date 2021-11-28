@@ -34,7 +34,7 @@ class Routing(
     private val mapboxMap: MapboxMap,
     private val activity: Activity,
     private val symbolLayerId: String,
-    private val dangerReports: DangerReports,
+    private val dangerReportsViewModel: DangerReportsViewModel,
     private val location: Location,
     private val routeViewModel: RouteViewModel
 ) {
@@ -82,66 +82,69 @@ class Routing(
     private fun detectDangerousZones() {
         // Need to check if close to danger
 
-        // Create a bounding box around the path with turf-bbox and turf-bbox-polygon
-        routeBounds = TurfMeasurement.bbox(routeViewModel.routeGeoJson.value)
-        // Make the bounding box a bit bigger than the path (add some padding)
-        for (i in routeBounds?.indices!!) {
-            if (i < 2) {
-                routeBounds!![i] -= 0.0008
-            } else {
-                routeBounds!![i] += 0.0008
-            }
-            println(routeBounds!![i])
-        }
-        // Find all the danger reports inside the box with turf-points-within-polygon
-        val polygon = TurfMeasurement.bboxPolygon(routeBounds!!)
-        showPathBoundingBox(polygon)
-        val pointsInBox = TurfJoins.pointsWithinPolygon(
-            dangerReports.dangerReportsGeoJson,
-            FeatureCollection.fromFeature(polygon)
-        )
-        println("Points in box")
-        println(pointsInBox)
-        // For each danger in the box, find the closest point to the line with turf-nearest-point-on-line
-        val pointsFeatures = pointsInBox.features()
-        val routePoints =
-            (routeViewModel.routeGeoJson.value?.features()?.get(0)?.geometry() as MultiLineString).coordinates()[0]
-        if (pointsFeatures != null && routePoints != null) {
-            val nearestPoints: Array<Feature?> = arrayOfNulls(pointsFeatures.size)
-            for ((i, f) in pointsFeatures.withIndex()) {
-                val point = f.geometry() as Point
-                nearestPoints[i] = TurfMisc.nearestPointOnLine(point, routePoints)
-            }
-            println("Nearest points")
-            // If a distance is less than X meters, the path is considered dangerous
-            val dangerousPoints = arrayListOf<Feature>()
-            for (f in nearestPoints) {
-                println(f)
-                val distance = f?.properties()?.get("dist")?.asDouble
-                // distance is in kilometers
-                if (distance != null && distance * 1000 < MIN_DANGER_DISTANCE) {
-                    dangerousPoints.add(f)
-                    println("=============== DANGER ===============")
-                    println(f)
-                    println("======================================")
+        val dangerFeatures = dangerReportsViewModel.getFeatures().value
+        if (dangerFeatures != null) {
+            // Create a bounding box around the path with turf-bbox and turf-bbox-polygon
+            routeBounds = TurfMeasurement.bbox(routeViewModel.routeGeoJson.value)
+            // Make the bounding box a bit bigger than the path (add some padding)
+            for (i in routeBounds?.indices!!) {
+                if (i < 2) {
+                    routeBounds!![i] -= 0.0008
+                } else {
+                    routeBounds!![i] += 0.0008
                 }
+                println(routeBounds!![i])
             }
-            println(dangerousPoints)
-            if (dangerousPoints.size > 0) {
-                loadedMapStyle.addSource(
-                    // Point to GeoJSON data. This example visualizes all M1.0+ earthquakes from
-                    // 12/22/15 to 1/21/16 as logged by USGS' Earthquake hazards program.
-                    GeoJsonSource(
-                        DANGER_SOURCE,
-                        FeatureCollection.fromFeatures(dangerousPoints)
+            // Find all the danger reports inside the box with turf-points-within-polygon
+            val polygon = TurfMeasurement.bboxPolygon(routeBounds!!)
+            showPathBoundingBox(polygon)
+            val pointsInBox = TurfJoins.pointsWithinPolygon(
+                dangerFeatures,
+                FeatureCollection.fromFeature(polygon)
+            )
+            println("Points in box")
+            println(pointsInBox)
+            // For each danger in the box, find the closest point to the line with turf-nearest-point-on-line
+            val pointsFeatures = pointsInBox.features()
+            val routePoints =
+                (routeViewModel.routeGeoJson.value?.features()?.get(0)?.geometry() as MultiLineString).coordinates()[0]
+            if (pointsFeatures != null && routePoints != null) {
+                val nearestPoints: Array<Feature?> = arrayOfNulls(pointsFeatures.size)
+                for ((i, f) in pointsFeatures.withIndex()) {
+                    val point = f.geometry() as Point
+                    nearestPoints[i] = TurfMisc.nearestPointOnLine(point, routePoints)
+                }
+                println("Nearest points")
+                // If a distance is less than X meters, the path is considered dangerous
+                val dangerousPoints = arrayListOf<Feature>()
+                for (f in nearestPoints) {
+                    println(f)
+                    val distance = f?.properties()?.get("dist")?.asDouble
+                    // distance is in kilometers
+                    if (distance != null && distance * 1000 < MIN_DANGER_DISTANCE) {
+                        dangerousPoints.add(f)
+                        println("=============== DANGER ===============")
+                        println(f)
+                        println("======================================")
+                    }
+                }
+                println(dangerousPoints)
+                if (dangerousPoints.size > 0) {
+                    loadedMapStyle.addSource(
+                        // Point to GeoJSON data. This example visualizes all M1.0+ earthquakes from
+                        // 12/22/15 to 1/21/16 as logged by USGS' Earthquake hazards program.
+                        GeoJsonSource(
+                            DANGER_SOURCE,
+                            FeatureCollection.fromFeatures(dangerousPoints)
+                        )
                     )
-                )
-                val dangerLayer = SymbolLayer(DANGER_LAYER, DANGER_SOURCE)
-                dangerLayer.setProperties(
-                    iconImage(MainActivity.WARNING_ICON),
-                    iconSize(0.8f),
-                )
-                loadedMapStyle.addLayer(dangerLayer)
+                    val dangerLayer = SymbolLayer(DANGER_LAYER, DANGER_SOURCE)
+                    dangerLayer.setProperties(
+                        iconImage(MainActivity.WARNING_ICON),
+                        iconSize(0.8f),
+                    )
+                    loadedMapStyle.addLayer(dangerLayer)
+                }
             }
         }
     }

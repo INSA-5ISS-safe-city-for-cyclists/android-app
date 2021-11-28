@@ -61,7 +61,7 @@ class PinSelector(
         val screenPoint: PointF = map.projection.toScreenLocation(point)
         // Query the source layer in that location
         val reportsFeatures: List<Feature> =
-            map.queryRenderedFeatures(screenPoint, "unclustered-points")
+            map.queryRenderedFeatures(screenPoint, MapFragment.REMOTE_REPORTS_ID)
         if (reportsFeatures.isNotEmpty()) {
             val feature: Feature = reportsFeatures[0]
             showReportModal(feature)

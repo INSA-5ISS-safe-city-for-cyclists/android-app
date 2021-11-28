@@ -22,39 +22,43 @@ import java.util.*
 
 
 class MapFragment : Fragment(R.layout.map_fragment) {
+    companion object {
+        const val REMOTE_REPORTS_ID = "REMOTE_REPORTS"
+    }
 
     private var mapView: MapView? = null
     private var mapboxMap: MapboxMap? = null
     private var symbolManager: SymbolManager? = null
     private var routing: Routing? = null
-    private var dangerReports: DangerReports? = null
+    private var remoteDangerReports: DangerReports? = null
     private var location: Location? = null
     private var pinSelector: PinSelector? = null
-    private val viewModel: SearchResultsViewModel by activityViewModels()
+    private val searchResultsViewModel: SearchResultsViewModel by activityViewModels()
     private val routeViewModel: RouteViewModel by activityViewModels()
+    private val remoteDangerReportsViewModel: RemoteDangerReportsViewModel by activityViewModels()
 
     private fun makeCustomGeoapifyStyle(): Style.Builder {
         val builder = Style.Builder()
         val inputStream = resources.openRawResource(R.raw.osm_bright_cycleways)
         val jsonString: String = Scanner(inputStream).useDelimiter("\\A").next()
-        println(jsonString)
         return builder.fromJson(jsonString)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireActivity())
+        remoteDangerReportsViewModel.initData()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState) // Get the MapBox context
         setupMap(view, savedInstanceState)
 
-        viewModel.selected.observe(viewLifecycleOwner, { selected ->
+        searchResultsViewModel.selected.observe(viewLifecycleOwner, { selected ->
             println("selection changed to $selected")
-            println("selected item: ${selected?.let { viewModel.dataSet.value?.get(it) }}")
+            println("selected item: ${selected?.let { searchResultsViewModel.dataSet.value?.get(it) }}")
             if (selected != null) {
-                val item = viewModel.dataSet.value?.get(selected)
+                val item = searchResultsViewModel.dataSet.value?.get(selected)
                 if (item != null) {
                     pinSelector?.showWaypointModal(item)
                     val p = (item.geometry() as Point)
@@ -89,8 +93,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 // Init classes
                 symbolManager = SymbolManager(mapView!!, map, style)
 
-                dangerReports = DangerReports(style, requireActivity())
-                dangerReports?.getGeoJsonData()
+                remoteDangerReports = DangerReports(style, this, remoteDangerReportsViewModel, REMOTE_REPORTS_ID)
 
                 location = Location(style, map, requireActivity(), view.findViewById(R.id.gpsFAB))
                 location?.onResume()
@@ -101,7 +104,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                     map,
                     requireActivity(),
                     symbolManager?.layerId!!,
-                    dangerReports!!,
+                    remoteDangerReportsViewModel,
                     location!!,
                     routeViewModel
                 )

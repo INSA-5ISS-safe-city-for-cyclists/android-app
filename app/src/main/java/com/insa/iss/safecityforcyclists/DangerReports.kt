@@ -1,8 +1,7 @@
 package com.insa.iss.safecityforcyclists
 
-import android.app.Activity
 import android.graphics.Color
-import com.mapbox.geojson.FeatureCollection
+import androidx.fragment.app.Fragment
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
@@ -10,55 +9,38 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import java.net.URISyntaxException
-import java.net.URL
-import kotlin.concurrent.thread
 
-class DangerReports(private val loadedMapStyle: Style, private val activity: Activity) {
-    companion object {
-        private const val CLUSTERS_SOURCE = "clusters"
-        private const val UNCLUSTERED_LAYER = "unclustered-points"
-    }
+class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, private val viewModel: DangerReportsViewModel, private val id: String) {
 
-    var dangerReportsGeoJson: FeatureCollection? = null
-        private set
-
-    fun getGeoJsonData() {
-        thread {
-            val response =
-                URL("https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson").readText()
-            dangerReportsGeoJson = FeatureCollection.fromJson(response)
-            activity.runOnUiThread {
-                loadGeoJsonSource()
-                addUnclusteredLayer()
-                addClusteredLayers()
-            }
-        }
+    init {
+        loadGeoJsonSource()
+        addUnclusteredLayer()
+        addClusteredLayers()
+        viewModel.getFeatures().observe(fragment.viewLifecycleOwner, {
+            loadGeoJsonSource()
+        })
     }
 
     private fun loadGeoJsonSource() {
-        // Add a new source from the GeoJSON data and set the 'cluster' option to true.
-        try {
+        val features = viewModel.getFeatures()
+        if (features.value != null) {
+            loadedMapStyle.removeSource(id)
             loadedMapStyle.addSource(
-                // Point to GeoJSON data. This example visualizes all M1.0+ earthquakes from
-                // 12/22/15 to 1/21/16 as logged by USGS' Earthquake hazards program.
                 GeoJsonSource(
-                    CLUSTERS_SOURCE,
-                    dangerReportsGeoJson,
+                    id,
+                    features.value,
                     GeoJsonOptions()
                         .withCluster(true)
                         .withClusterMaxZoom(14)
                         .withClusterRadius(50)
                 )
             )
-        } catch (uriSyntaxException: URISyntaxException) {
-            println("Check the URL %s" + uriSyntaxException.message)
         }
     }
 
     private fun addUnclusteredLayer() {
         //Creating a marker layer for single data points
-        val unclustered = SymbolLayer(UNCLUSTERED_LAYER, CLUSTERS_SOURCE)
+        val unclustered = SymbolLayer(id, id)
         unclustered.setProperties(
             iconImage(MainActivity.MARKER_ICON),
             iconSize(
@@ -81,7 +63,7 @@ class DangerReports(private val loadedMapStyle: Style, private val activity: Act
         )
         for (i in layers.indices) {
             //Add clusters' circles
-            val circles = CircleLayer("cluster-$i", CLUSTERS_SOURCE)
+            val circles = CircleLayer("${id}_cluster_$i", id)
             circles.setProperties(
                 circleColor(layers[i][2]),
                 circleRadius(layers[i][1].toFloat())
@@ -103,7 +85,7 @@ class DangerReports(private val loadedMapStyle: Style, private val activity: Act
         }
 
         //Add the count labels
-        val count = SymbolLayer("count", CLUSTERS_SOURCE)
+        val count = SymbolLayer("${id}_count", id)
         count.setProperties(
             textField(Expression.toString(Expression.get("point_count"))),
             textSize(12f),
