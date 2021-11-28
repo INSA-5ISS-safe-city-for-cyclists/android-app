@@ -1,4 +1,4 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.fragments
 
 import android.os.Bundle
 import android.view.Gravity
@@ -8,6 +8,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
+import com.insa.iss.safecityforcyclists.*
+import com.insa.iss.safecityforcyclists.location.Location
+import com.insa.iss.safecityforcyclists.reports.DangerReports
+import com.insa.iss.safecityforcyclists.reports.RemoteDangerReportsViewModel
+import com.insa.iss.safecityforcyclists.routing.RouteViewModel
+import com.insa.iss.safecityforcyclists.routing.Routing
+import com.insa.iss.safecityforcyclists.search.SearchResultsViewModel
+import com.insa.iss.safecityforcyclists.selection.PinSelector
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraPosition

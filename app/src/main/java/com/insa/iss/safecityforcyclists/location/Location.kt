@@ -1,4 +1,4 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.location
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.insa.iss.safecityforcyclists.R
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.LocationComponentOptions

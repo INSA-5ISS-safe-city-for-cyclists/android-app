@@ -1,4 +1,4 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.fragments
 
 import android.os.Bundle
 import android.transition.Slide
@@ -9,6 +9,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.insa.iss.safecityforcyclists.R
+import com.insa.iss.safecityforcyclists.routing.RouteViewModel
 import com.mapbox.turf.TurfConversion
 import java.util.*
 

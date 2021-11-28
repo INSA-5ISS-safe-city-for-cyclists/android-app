@@ -1,4 +1,4 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.search
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

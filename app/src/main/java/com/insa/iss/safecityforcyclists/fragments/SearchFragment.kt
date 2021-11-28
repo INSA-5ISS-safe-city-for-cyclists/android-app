@@ -1,4 +1,4 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -11,6 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.insa.iss.safecityforcyclists.R
+import com.insa.iss.safecityforcyclists.search.SearchListAdapter
+import com.insa.iss.safecityforcyclists.search.SearchResultsViewModel
 import com.mapbox.geojson.FeatureCollection
 import java.net.URL
 import java.net.URLEncoder

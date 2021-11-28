@@ -1,11 +1,12 @@
 package com.insa.iss.safecityforcyclists
 
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
+import com.insa.iss.safecityforcyclists.fragments.MapFragment
+import com.insa.iss.safecityforcyclists.fragments.SearchFragment
 
 
 class MainActivity : AppCompatActivity() {

@@ -1,7 +1,11 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.routing
 
 import android.app.Activity
 import android.graphics.Color
+import com.insa.iss.safecityforcyclists.location.Location
+import com.insa.iss.safecityforcyclists.MainActivity
+import com.insa.iss.safecityforcyclists.R
+import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.MultiLineString

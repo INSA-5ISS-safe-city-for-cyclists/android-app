@@ -1,4 +1,4 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.routing
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

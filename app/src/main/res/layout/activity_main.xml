@@ -10,7 +10,7 @@
         android:id="@+id/fragment_container_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.insa.iss.safecityforcyclists.MapFragment" />
+        android:name="com.insa.iss.safecityforcyclists.fragments.MapFragment" />
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"

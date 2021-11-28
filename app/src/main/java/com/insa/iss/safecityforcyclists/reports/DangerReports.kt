@@ -1,7 +1,8 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.reports
 
 import android.graphics.Color
 import androidx.fragment.app.Fragment
+import com.insa.iss.safecityforcyclists.MainActivity
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.CircleLayer

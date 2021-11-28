@@ -1,4 +1,4 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.insa.iss.safecityforcyclists.R
 import com.mapbox.geojson.Feature
 
 class BottomSheetDialog(private val feature: Feature) : BottomSheetDialogFragment() {

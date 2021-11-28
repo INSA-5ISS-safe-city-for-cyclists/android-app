@@ -1,4 +1,4 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.fragments
 
 import android.content.DialogInterface
 import android.os.Bundle
@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.insa.iss.safecityforcyclists.R
 import com.mapbox.geojson.Feature
 
 class WaypointBottomSheetDialog(private val feature: Feature, private val onRouteFromClicked: () -> Unit, private val onRouteToClicked: () -> Unit, private val onDismiss: () -> Unit) : BottomSheetDialogFragment() {

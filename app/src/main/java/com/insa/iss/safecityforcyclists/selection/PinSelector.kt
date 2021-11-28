@@ -1,8 +1,13 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.selection
 
 import android.graphics.PointF
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
+import com.insa.iss.safecityforcyclists.MainActivity
+import com.insa.iss.safecityforcyclists.fragments.BottomSheetDialog
+import com.insa.iss.safecityforcyclists.fragments.MapFragment
+import com.insa.iss.safecityforcyclists.fragments.WaypointBottomSheetDialog
+import com.insa.iss.safecityforcyclists.routing.Routing
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng

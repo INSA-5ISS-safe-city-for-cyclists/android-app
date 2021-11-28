@@ -1,4 +1,4 @@
-package com.insa.iss.safecityforcyclists
+package com.insa.iss.safecityforcyclists.reports
 
 import androidx.lifecycle.viewModelScope
 import com.mapbox.geojson.FeatureCollection
