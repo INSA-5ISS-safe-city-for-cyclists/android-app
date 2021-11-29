@@ -17,4 +17,13 @@ interface LocalReportDao {
 
     @Delete
     fun deleteReports(reports: List<LocalReport>)
+
+    @Query("DELETE FROM local_reports WHERE id IN (:ids)")
+    fun deleteReportsById(ids: List<Int>)
+
+    @Query("UPDATE local_reports SET sync = 1 WHERE id IN (:ids)")
+    fun syncReportsById(ids: List<Int>)
+
+    @Query("UPDATE local_reports SET sync = 0 WHERE id IN (:ids)")
+    fun unsyncReportsById(ids: List<Int>)
 }

@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "local_reports")
 data class LocalReport(
-    @PrimaryKey(autoGenerate = true) val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo(name = "timestamp") val timestamp: Int,
     @ColumnInfo(name = "distance") val distance: Double,
     @ColumnInfo(name = "object_speed") val objectSpeed: Double,

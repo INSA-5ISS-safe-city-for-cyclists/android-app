@@ -8,9 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
-import com.insa.iss.safecityforcyclists.*
+import com.insa.iss.safecityforcyclists.MainActivity
+import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.location.Location
 import com.insa.iss.safecityforcyclists.reports.DangerReports
+import com.insa.iss.safecityforcyclists.reports.LocalDangerReportsViewModel
 import com.insa.iss.safecityforcyclists.reports.RemoteDangerReportsViewModel
 import com.insa.iss.safecityforcyclists.routing.RouteViewModel
 import com.insa.iss.safecityforcyclists.routing.Routing
@@ -44,6 +46,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     private val searchResultsViewModel: SearchResultsViewModel by activityViewModels()
     private val routeViewModel: RouteViewModel by activityViewModels()
     private val remoteDangerReportsViewModel: RemoteDangerReportsViewModel by activityViewModels()
+    private val localDangerReportsViewModel: LocalDangerReportsViewModel by activityViewModels()
 
     private fun makeCustomGeoapifyStyle(): Style.Builder {
         val builder = Style.Builder()
@@ -56,11 +59,19 @@ class MapFragment : Fragment(R.layout.map_fragment) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireActivity())
         remoteDangerReportsViewModel.initData()
+        localDangerReportsViewModel.initData()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState) // Get the MapBox context
         setupMap(view, savedInstanceState)
+
+        // Debug database
+        if (resources.getBoolean(R.bool.debug)) {
+            val databaseDebugView: View =
+                view.findViewById(R.id.database_debug_fragment)
+            databaseDebugView.visibility = View.VISIBLE
+        }
 
         searchResultsViewModel.selected.observe(viewLifecycleOwner, { selected ->
             println("selection changed to $selected")
@@ -101,7 +112,8 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 // Init classes
                 symbolManager = SymbolManager(mapView!!, map, style)
 
-                remoteDangerReports = DangerReports(style, this, remoteDangerReportsViewModel, REMOTE_REPORTS_ID)
+                remoteDangerReports =
+                    DangerReports(style, this, remoteDangerReportsViewModel, REMOTE_REPORTS_ID)
 
                 location = Location(style, map, requireActivity(), view.findViewById(R.id.gpsFAB))
                 location?.onResume()
