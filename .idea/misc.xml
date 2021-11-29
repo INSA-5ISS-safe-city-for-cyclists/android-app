@@ -4,25 +4,25 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.2078125" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/drawable/ic_add_24.xml" value="0.23489583333333333" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/drawable/ic_baseline_delete_forever_24.xml" value="0.23489583333333333" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/drawable/ic_baseline_gps_fixed_24.xml" value="0.23489583333333333" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/drawable/ic_baseline_gps_not_fixed_24.xml" value="0.23489583333333333" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/drawable/ic_baseline_gps_off_24.xml" value="0.23489583333333333" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/drawable/ic_baseline_horizontal_rule_24.xml" value="0.23489583333333333" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.23489583333333333" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/drawable/ic_baseline_sync_disabled_24.xml" value="0.403125" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/activity_main.xml" value="0.28940217391304346" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/bottom_sheet_layout.xml" value="0.38697916666666665" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/database_debug.xml" value="0.21875" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/database_test.xml" value="0.21875" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/dialog_add_debug_report.xml" value="0.21875" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/dialog_add_report.xml" value="0.21875" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/dialog_add_test_report.xml" value="0.21875" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/dialog_delete_debug_report.xml" value="0.21875" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/dialog_delete_report.xml" value="0.28940217391304346" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/map_fragment.xml" value="0.28940217391304346" />
-        <entry key="..\:/J-R/Travail/INSA/5A/Projet Innovant/Android-app/app/src/main/res/layout/search_fragment.xml" value="0.28940217391304346" />
+        <entry key="app/src/main/res/drawable/ic_add_24.xml" value="0.23489583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_delete_forever_24.xml" value="0.23489583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_gps_fixed_24.xml" value="0.23489583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_gps_not_fixed_24.xml" value="0.23489583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_gps_off_24.xml" value="0.23489583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_horizontal_rule_24.xml" value="0.23489583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.23489583333333333" />
+        <entry key="app/src/main/res/drawable/ic_baseline_sync_disabled_24.xml" value="0.403125" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.28940217391304346" />
+        <entry key="app/src/main/res/layout/bottom_sheet_layout.xml" value="0.38697916666666665" />
+        <entry key="app/src/main/res/layout/database_debug.xml" value="0.21875" />
+        <entry key="app/src/main/res/layout/database_test.xml" value="0.21875" />
+        <entry key="app/src/main/res/layout/dialog_add_debug_report.xml" value="0.21875" />
+        <entry key="app/src/main/res/layout/dialog_add_report.xml" value="0.21875" />
+        <entry key="app/src/main/res/layout/dialog_add_test_report.xml" value="0.21875" />
+        <entry key="app/src/main/res/layout/dialog_delete_debug_report.xml" value="0.21875" />
+        <entry key="app/src/main/res/layout/dialog_delete_report.xml" value="0.28940217391304346" />
+        <entry key="app/src/main/res/layout/map_fragment.xml" value="0.28940217391304346" />
+        <entry key="app/src/main/res/layout/search_fragment.xml" value="0.28940217391304346" />
         <entry key="app/src/main/res/drawable/ic_baseline_gps_fixed_24.xml" value="0.15765765765765766" />
         <entry key="app/src/main/res/drawable/ic_baseline_gps_not_fixed_24.xml" value="0.15765765765765766" />
         <entry key="app/src/main/res/drawable/ic_baseline_gps_off_24.xml" value="0.15765765765765766" />
