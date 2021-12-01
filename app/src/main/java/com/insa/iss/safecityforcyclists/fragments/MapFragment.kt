@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.MainActivity
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.location.Location
@@ -47,6 +48,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     private val routeViewModel: RouteViewModel by activityViewModels()
     private val remoteDangerReportsViewModel: RemoteDangerReportsViewModel by activityViewModels()
     private val localDangerReportsViewModel: LocalDangerReportsViewModel by activityViewModels()
+    private var uploadFAB: FloatingActionButton? = null
 
     private fun makeCustomGeoapifyStyle(): Style.Builder {
         val builder = Style.Builder()
@@ -65,6 +67,16 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState) // Get the MapBox context
         setupMap(view, savedInstanceState)
+        uploadFAB = view.findViewById(R.id.uploadFAB)
+        uploadFAB?.setOnClickListener {
+            val bottomSheet = UploadSummaryBottomSheetDialog { item, position ->
+                println("Pressed $item at position $position")
+            }
+            bottomSheet.show(
+                requireActivity().supportFragmentManager,
+                "ModalBottomSheet"
+            )
+        }
 
         // Debug database
         if (resources.getBoolean(R.bool.debug)) {

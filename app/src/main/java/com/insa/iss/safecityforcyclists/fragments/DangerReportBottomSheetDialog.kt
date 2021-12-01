@@ -9,7 +9,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.insa.iss.safecityforcyclists.R
 import com.mapbox.geojson.Feature
 
-class BottomSheetDialog(private val feature: Feature) : BottomSheetDialogFragment() {
+class DangerReportBottomSheetDialog(private val feature: Feature) : BottomSheetDialogFragment() {
 
     private var title: TextView? = null
     private var subtitle: TextView? = null

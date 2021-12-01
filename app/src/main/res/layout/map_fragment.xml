@@ -24,12 +24,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
-                android:layout_marginBottom="96dp"
+                android:layout_marginBottom="24dp"
+                android:clickable="true"
+                app:layout_constraintBottom_toTopOf="@+id/uploadFAB"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:srcCompat="@drawable/ic_baseline_gps_off_24" />
+
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/uploadFAB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="64dp"
                 android:clickable="true"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                mapbox:srcCompat="@drawable/ic_baseline_gps_off_24" />
-
+                app:srcCompat="@drawable/ic_baseline_cloud_upload_24" />
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/summary_fragment_container_view"

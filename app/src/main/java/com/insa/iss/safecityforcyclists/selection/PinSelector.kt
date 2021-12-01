@@ -4,7 +4,7 @@ import android.graphics.PointF
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
 import com.insa.iss.safecityforcyclists.MainActivity
-import com.insa.iss.safecityforcyclists.fragments.BottomSheetDialog
+import com.insa.iss.safecityforcyclists.fragments.DangerReportBottomSheetDialog
 import com.insa.iss.safecityforcyclists.fragments.MapFragment
 import com.insa.iss.safecityforcyclists.fragments.WaypointBottomSheetDialog
 import com.insa.iss.safecityforcyclists.routing.Routing
@@ -93,7 +93,7 @@ class PinSelector(
     }
 
     private fun showReportModal(feature: Feature) {
-        val bottomSheet = BottomSheetDialog(feature)
+        val bottomSheet = DangerReportBottomSheetDialog(feature)
         bottomSheet.show(
             activity.supportFragmentManager,
             "ModalBottomSheet"
