@@ -169,6 +169,8 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     private fun addSymbolImages(style: Style) {
         val markerIconDrawable =
             ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon, null)
+        val localMarkerIconDrawable =
+            ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon_local, null)
         val waypointIconDrawable =
             ResourcesCompat.getDrawable(this.resources, R.drawable.ic_waypoint_icon, null)
         val destinationIconDrawable =
@@ -183,6 +185,10 @@ class MapFragment : Fragment(R.layout.map_fragment) {
         style.addImage(
             MainActivity.MARKER_ICON,
             BitmapUtils.getBitmapFromDrawable(markerIconDrawable)!!,
+        )
+        style.addImage(
+            MainActivity.LOCAL_MARKER_ICON,
+            BitmapUtils.getBitmapFromDrawable(localMarkerIconDrawable)!!,
         )
         style.addImage(
             MainActivity.WAYPOINT_ICON,

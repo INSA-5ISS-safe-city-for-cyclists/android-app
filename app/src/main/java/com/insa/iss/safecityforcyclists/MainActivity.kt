@@ -12,6 +12,7 @@ import com.insa.iss.safecityforcyclists.fragments.SearchFragment
 class MainActivity : AppCompatActivity() {
     companion object {
         const val MARKER_ICON = "MARKER_ICON"
+        const val LOCAL_MARKER_ICON = "LOCAL_MARKER_ICON"
         const val WARNING_ICON = "WARNING_ICON"
         const val WAYPOINT_ICON = "WAYPOINT_ICON"
         const val DESTINATION_ICON = "DESTINATION_ICON"

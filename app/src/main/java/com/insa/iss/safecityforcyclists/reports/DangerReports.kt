@@ -26,6 +26,23 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
         })
     }
 
+    private fun isLocal(): Boolean {
+        viewModel.getFeatures().value?.features()?.let {  features ->
+            if (features.size > 0) {
+                return features[0].properties()?.get("sync")?.asBoolean != null
+            }
+        }
+        return false
+    }
+
+    private fun getMarkerIcon(): String {
+        return if (isLocal()) {
+            MainActivity.LOCAL_MARKER_ICON
+        } else {
+            MainActivity.MARKER_ICON
+        }
+    }
+
     private fun loadGeoJsonSource() {
         val features = viewModel.getFeatures()
         println(id)
@@ -54,7 +71,7 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
         //Creating a marker layer for single data points
         val unclustered = SymbolLayer(id, id)
         unclustered.setProperties(
-            iconImage(MainActivity.MARKER_ICON),
+            iconImage(getMarkerIcon()),
             iconSize(
                 Expression.division(
                     Expression.get("mag"), Expression.literal(4.0f)
@@ -63,14 +80,13 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
         )
         unclustered.setFilter(Expression.has("mag"))
         loadedMapStyle.addLayer(unclustered)
-
     }
 
     private fun addUnclusteredLayer() {
         //Creating a marker layer for single data points
         val unclustered = SymbolLayer(id, id)
         unclustered.setProperties(
-            iconImage(MainActivity.MARKER_ICON),
+            iconImage(getMarkerIcon()),
             iconSize(
                 Expression.division(
                     Expression.get("object_speed"), Expression.literal(4.0f)
