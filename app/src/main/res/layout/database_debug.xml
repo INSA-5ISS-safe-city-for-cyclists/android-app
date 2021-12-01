@@ -7,72 +7,88 @@
     android:layout_marginTop="84dp">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/quickAddFAB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="32dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_baseline_add_24" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/quickRemoveFAB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/quickAddFAB"
+        app:layout_constraintStart_toEndOf="@+id/quickAddFAB"
+        app:srcCompat="@drawable/ic_baseline_horizontal_rule_24" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addReportFAB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="19dp"
-        android:layout_marginBottom="100dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/ic_baseline_add_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         android:contentDescription="Add report"
-        tools:ignore="HardcodedText"/>
+        android:focusable="true"
+        android:src="@drawable/ic_baseline_add_circle_outline_24"
+        app:layout_constraintBottom_toTopOf="@+id/quickAddFAB"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="HardcodedText" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/viewReportFAB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="100dp"
         android:clickable="true"
+        android:contentDescription="View all reports"
         android:focusable="true"
         android:src="@drawable/ic_baseline_preview_24"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/deleteReportFAB"
         app:layout_constraintStart_toEndOf="@+id/deleteReportFAB"
-        android:contentDescription="View all reports"
         tools:ignore="HardcodedText" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/deleteReportFAB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="100dp"
         android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/ic_baseline_horizontal_rule_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/addReportFAB"
         android:contentDescription="Delete reports"
+        android:focusable="true"
+        android:src="@drawable/ic_baseline_remove_circle_outline_24"
+        app:layout_constraintBottom_toBottomOf="@+id/addReportFAB"
+        app:layout_constraintStart_toStartOf="@+id/quickRemoveFAB"
         tools:ignore="HardcodedText" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/syncAllReportsFAB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="168dp"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
+        android:contentDescription="Sync all reports"
         android:focusable="true"
         android:src="@drawable/ic_baseline_sync_24"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/addReportFAB"
         app:layout_constraintStart_toStartOf="@+id/addReportFAB"
-        android:contentDescription="Sync all reports"
         tools:ignore="HardcodedText" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/unsyncAllReportsFAB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="168dp"
         android:clickable="true"
+        android:contentDescription="Unsync all reports"
         android:focusable="true"
         android:src="@drawable/ic_baseline_sync_disabled_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/syncAllReportsFAB"
-        android:contentDescription="Unsync all reports"
+        app:layout_constraintBottom_toBottomOf="@+id/syncAllReportsFAB"
+        app:layout_constraintStart_toStartOf="@+id/deleteReportFAB"
         tools:ignore="HardcodedText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
