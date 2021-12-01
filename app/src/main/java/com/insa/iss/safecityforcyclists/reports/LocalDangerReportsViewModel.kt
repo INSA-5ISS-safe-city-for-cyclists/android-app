@@ -50,7 +50,7 @@ class LocalDangerReportsViewModel(application: Application) : DangerReportsViewM
                             "}, " +
                             "\"geometry\": { " +
                             "\"type\": \"Point\", " +
-                            "\"coordinates\": [ ${report.latitude}, ${report.longitude}, 0.0 ] " +
+                            "\"coordinates\": [ ${report.longitude}, ${report.latitude}, 0.0 ] " +
                             "} }")
                     featureList.add(f)
                 }

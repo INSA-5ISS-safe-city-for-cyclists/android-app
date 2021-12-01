@@ -35,6 +35,7 @@ import java.util.*
 class MapFragment : Fragment(R.layout.map_fragment) {
     companion object {
         const val REMOTE_REPORTS_ID = "REMOTE_REPORTS"
+        const val LOCAL_REPORTS_ID = "LOCAL_REPORTS"
     }
 
     private var mapView: MapView? = null
@@ -42,6 +43,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     private var symbolManager: SymbolManager? = null
     private var routing: Routing? = null
     private var remoteDangerReports: DangerReports? = null
+    private var localDangerReports: DangerReports? = null
     private var location: Location? = null
     private var pinSelector: PinSelector? = null
     private val searchResultsViewModel: SearchResultsViewModel by activityViewModels()
@@ -125,7 +127,9 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 symbolManager = SymbolManager(mapView!!, map, style)
 
                 remoteDangerReports =
-                    DangerReports(style, this, remoteDangerReportsViewModel, REMOTE_REPORTS_ID)
+                    DangerReports(style, this, remoteDangerReportsViewModel, REMOTE_REPORTS_ID, true)
+                localDangerReports =
+                    DangerReports(style, this, localDangerReportsViewModel, LOCAL_REPORTS_ID)
 
                 location = Location(style, map, requireActivity(), view.findViewById(R.id.gpsFAB))
                 location?.onResume()

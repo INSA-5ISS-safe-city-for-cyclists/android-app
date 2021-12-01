@@ -48,8 +48,8 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
                         distance = (size + 2).toDouble(),
                         objectSpeed = (size + 3).toDouble(),
                         bicycleSpeed =(size + 4).toDouble(),
-                        latitude = (size + 5).toDouble(),
-                        longitude = (size + 6).toDouble(),
+                        latitude = 43.6020 + (size).toDouble() * 0.01,
+                        longitude = 1.4530 + (size).toDouble() * 0.01,
                         sync = false
                     )
                 )

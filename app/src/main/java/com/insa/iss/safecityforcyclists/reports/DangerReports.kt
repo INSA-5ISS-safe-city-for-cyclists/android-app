@@ -11,11 +11,15 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 
-class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, private val viewModel: DangerReportsViewModel, private val id: String) {
+class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, private val viewModel: DangerReportsViewModel, private val id: String, debug: Boolean = false) {
 
     init {
         loadGeoJsonSource()
-        addUnclusteredLayer()
+        if (debug) {
+            addUnclusteredLayerDebug()
+        } else {
+            addUnclusteredLayer()
+        }
         addClusteredLayers()
         viewModel.getFeatures().observe(fragment.viewLifecycleOwner, {
             loadGeoJsonSource()
@@ -24,22 +28,29 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
 
     private fun loadGeoJsonSource() {
         val features = viewModel.getFeatures()
+        println(id)
         if (features.value != null) {
-            loadedMapStyle.removeSource(id)
-            loadedMapStyle.addSource(
-                GeoJsonSource(
-                    id,
-                    features.value,
-                    GeoJsonOptions()
-                        .withCluster(true)
-                        .withClusterMaxZoom(14)
-                        .withClusterRadius(50)
+            val source = loadedMapStyle.getSource(id) as GeoJsonSource?
+            if (source == null) {
+                loadedMapStyle.addSource(
+                    GeoJsonSource(
+                        id,
+                        features.value,
+                        GeoJsonOptions()
+                            .withCluster(true)
+                            .withClusterMaxZoom(14)
+                            .withClusterRadius(50)
+                    )
                 )
-            )
+                println("Added initial geojson with ${features.value}")
+            } else {
+                source.setGeoJson(features.value)
+                println("updated geojson with ${features.value}")
+            }
         }
     }
 
-    private fun addUnclusteredLayer() {
+    private fun addUnclusteredLayerDebug() {
         //Creating a marker layer for single data points
         val unclustered = SymbolLayer(id, id)
         unclustered.setProperties(
@@ -51,6 +62,21 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
             )
         )
         unclustered.setFilter(Expression.has("mag"))
+        loadedMapStyle.addLayer(unclustered)
+
+    }
+
+    private fun addUnclusteredLayer() {
+        //Creating a marker layer for single data points
+        val unclustered = SymbolLayer(id, id)
+        unclustered.setProperties(
+            iconImage(MainActivity.MARKER_ICON),
+            iconSize(
+                Expression.division(
+                    Expression.get("object_speed"), Expression.literal(4.0f)
+                )
+            )
+        )
         loadedMapStyle.addLayer(unclustered)
     }
 
@@ -96,5 +122,4 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
         )
         loadedMapStyle.addLayer(count)
     }
-
 }

@@ -31,6 +31,6 @@ class DangerReportBottomSheetDialog(private val feature: Feature) : BottomSheetD
         title = view.findViewById(R.id.title) as TextView
         subtitle = view.findViewById(R.id.subtitle) as TextView
         title?.text = feature.properties()?.get("id")?.asString
-        subtitle?.text = feature.properties()?.toString()
+        subtitle?.text = "$feature"
     }
 }
