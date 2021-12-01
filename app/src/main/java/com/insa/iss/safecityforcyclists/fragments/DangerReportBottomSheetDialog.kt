@@ -1,5 +1,6 @@
 package com.insa.iss.safecityforcyclists.fragments
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.insa.iss.safecityforcyclists.R
 import com.mapbox.geojson.Feature
 
-class DangerReportBottomSheetDialog(private val feature: Feature) : BottomSheetDialogFragment() {
+class DangerReportBottomSheetDialog(private val feature: Feature, private val onDismiss: () -> Unit) : BottomSheetDialogFragment() {
 
     private var title: TextView? = null
     private var subtitle: TextView? = null
@@ -32,5 +33,10 @@ class DangerReportBottomSheetDialog(private val feature: Feature) : BottomSheetD
         subtitle = view.findViewById(R.id.subtitle) as TextView
         title?.text = feature.properties()?.get("id")?.asString
         subtitle?.text = "$feature"
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        onDismiss()
     }
 }

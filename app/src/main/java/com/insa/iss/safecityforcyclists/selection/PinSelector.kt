@@ -65,24 +65,30 @@ class PinSelector(
         // Get the clicked point coordinates
         val screenPoint: PointF = map.projection.toScreenLocation(point)
         // Query the source layer in that location
-        val reportsFeatures: List<Feature> =
+        val remoteReportsFeatures: List<Feature> =
             map.queryRenderedFeatures(screenPoint, MapFragment.REMOTE_REPORTS_ID)
-        if (reportsFeatures.isNotEmpty()) {
-            val feature: Feature = reportsFeatures[0]
+        if (remoteReportsFeatures.isNotEmpty()) {
+            val feature: Feature = remoteReportsFeatures[0]
             showReportModal(feature)
         } else {
-            val features: List<Feature> =
-                map.queryRenderedFeatures(
-                    screenPoint,
-                    "poi-level-3",
-                    "poi-level-2",
-                    "poi-level-1",
-                    "poi-railway"
-                )
-            println(features)
-            if (features.isNotEmpty()) {
-                val feature: Feature = features[0]
-                showWaypointModal(feature)
+            val localReportsFeatures: List<Feature> =
+                map.queryRenderedFeatures(screenPoint, MapFragment.LOCAL_REPORTS_ID)
+            if (localReportsFeatures.isNotEmpty()) {
+                val feature: Feature = localReportsFeatures[0]
+                showReportModal(feature)
+            } else {
+                val features: List<Feature> =
+                    map.queryRenderedFeatures(
+                        screenPoint,
+                        "poi-level-3",
+                        "poi-level-2",
+                        "poi-level-1",
+                        "poi-railway"
+                    )
+                if (features.isNotEmpty()) {
+                    val feature: Feature = features[0]
+                    showWaypointModal(feature)
+                }
             }
         }
     }
@@ -93,11 +99,32 @@ class PinSelector(
     }
 
     private fun showReportModal(feature: Feature) {
-        val bottomSheet = DangerReportBottomSheetDialog(feature)
+        val p = feature.geometry() as Point
+        val point = LatLng(p.latitude(), p.longitude())
+        showSelectionCircle(point)
+        val bottomSheet = DangerReportBottomSheetDialog(feature) {
+            hideSelectionCircle()
+        }
         bottomSheet.show(
             activity.supportFragmentManager,
             "ModalBottomSheet"
         )
+    }
+
+    private fun showSelectionCircle(point: LatLng) {
+        circleManager?.deleteAll()
+        val newCircle = circleManager?.create(
+            CircleOptions()
+                .withLatLng(point)
+                .withCircleColor("#0000ff")
+                .withCircleOpacity(0.3f)
+                .withCircleRadius(15f)
+        )
+        circleManager?.update(newCircle)
+    }
+
+    private fun hideSelectionCircle() {
+        circleManager?.deleteAll()
     }
 
     fun showWaypointModal(feature: Feature) {
@@ -108,17 +135,9 @@ class PinSelector(
         }, {
             addRouteWaypoint(point, false)
         }, {
-            circleManager?.deleteAll()
+            hideSelectionCircle()
         })
-        circleManager?.deleteAll()
-        val newCircle = circleManager?.create(
-            CircleOptions()
-                .withLatLng(point)
-                .withCircleColor("#0000ff")
-                .withCircleOpacity(0.3f)
-                .withCircleRadius(15f)
-        )
-        circleManager?.update(newCircle)
+        showSelectionCircle(point)
 
         bottomSheet.show(
             activity.supportFragmentManager,
