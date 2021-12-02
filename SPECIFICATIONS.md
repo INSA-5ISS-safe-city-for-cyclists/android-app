@@ -51,10 +51,10 @@
 
 [] Fetch classification criteria from server on start
 [] Use fetched classification to display relevant reports on the map
-[] Show local reports in a different color from others
-[] Show button to upload reports
-[] Show recap modal with the list of reports to upload
-[] Clicking on a report in the list will lower the modal and select the report on the map
+[x] Show local reports in a different color from others
+[x] Show button to upload reports
+[x] Show recap modal with the list of reports to upload
+[x] Clicking on a report in the list will lower the modal and select the report on the map
 [] Allow removing selected local report
 [] Remove uploaded reports database
 [] Remove non-dangerous reports (2 weeks) on start
