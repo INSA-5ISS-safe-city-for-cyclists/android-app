@@ -2,7 +2,12 @@ package com.insa.iss.safecityforcyclists.reports
 
 import android.graphics.Color
 import androidx.fragment.app.Fragment
-import com.insa.iss.safecityforcyclists.MainActivity
+import com.insa.iss.safecityforcyclists.MainActivity.Companion.LOCAL_MARKER_ICON
+import com.insa.iss.safecityforcyclists.MainActivity.Companion.MARKER_ICON
+import com.insa.iss.safecityforcyclists.fragments.MapFragment.Companion.LOCAL_REPORTS_ID
+import com.insa.iss.safecityforcyclists.fragments.MapFragment.Companion.REMOTE_REPORTS_ID
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
@@ -11,67 +16,70 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 
-class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, private val viewModel: DangerReportsViewModel, private val id: String, debug: Boolean = false) {
+class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, private val viewModel: DangerReportsViewModel) {
 
     init {
         loadGeoJsonSource()
-        if (debug) {
-            addUnclusteredLayerDebug()
-        } else {
-            addUnclusteredLayer()
-        }
+        addUnclusteredLayerRemote()
+        addUnclusteredLayerLocal()
         addClusteredLayers()
-        viewModel.getFeatures().observe(fragment.viewLifecycleOwner, {
+
+        viewModel.getRemoteFeatures().observe(fragment.viewLifecycleOwner, {
+            loadGeoJsonSource()
+        })
+        viewModel.getLocalFeatures().observe(fragment.viewLifecycleOwner, {
             loadGeoJsonSource()
         })
     }
 
-    private fun isLocal(): Boolean {
-        viewModel.getFeatures().value?.features()?.let {  features ->
-            if (features.size > 0) {
-                return features[0].properties()?.get("sync")?.asBoolean != null
+    private fun getCombinedReports(): FeatureCollection? {
+        val localFeatures = viewModel.getLocalFeatures().value
+        val remoteFeatures = viewModel.getRemoteFeatures().value
+        if (localFeatures != null && remoteFeatures != null) {
+            val totalFeatures = ArrayList<Feature>()
+            localFeatures.features()?.let {
+                totalFeatures.addAll(it)
             }
+            remoteFeatures.features()?.let {
+                totalFeatures.addAll(it)
+            }
+            return FeatureCollection.fromFeatures(totalFeatures)
+        } else if (localFeatures != null) {
+            return localFeatures
+        } else {
+            return remoteFeatures
         }
-        return false
     }
 
-    private fun getMarkerIcon(): String {
-        return if (isLocal()) {
-            MainActivity.LOCAL_MARKER_ICON
-        } else {
-            MainActivity.MARKER_ICON
-        }
-    }
 
     private fun loadGeoJsonSource() {
-        val features = viewModel.getFeatures()
-        println(id)
-        if (features.value != null) {
-            val source = loadedMapStyle.getSource(id) as GeoJsonSource?
+        val features = getCombinedReports()
+        if (features != null) {
+            val source = loadedMapStyle.getSource(REMOTE_REPORTS_ID) as GeoJsonSource?
             if (source == null) {
                 loadedMapStyle.addSource(
                     GeoJsonSource(
-                        id,
-                        features.value,
+                        REMOTE_REPORTS_ID,
+                        features,
                         GeoJsonOptions()
                             .withCluster(true)
                             .withClusterMaxZoom(14)
                             .withClusterRadius(50)
                     )
                 )
-                println("Added initial geojson with ${features.value}")
+                println("Added initial geojson with $features")
             } else {
-                source.setGeoJson(features.value)
-                println("updated geojson with ${features.value}")
+                source.setGeoJson(features)
+                println("updated geojson with $features")
             }
         }
     }
 
-    private fun addUnclusteredLayerDebug() {
+    private fun addUnclusteredLayerRemote() {
         //Creating a marker layer for single data points
-        val unclustered = SymbolLayer(id, id)
+        val unclustered = SymbolLayer(REMOTE_REPORTS_ID, REMOTE_REPORTS_ID)
         unclustered.setProperties(
-            iconImage(getMarkerIcon()),
+            iconImage(MARKER_ICON),
             iconSize(
                 Expression.division(
                     Expression.get("mag"), Expression.literal(4.0f)
@@ -82,17 +90,18 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
         loadedMapStyle.addLayer(unclustered)
     }
 
-    private fun addUnclusteredLayer() {
+    private fun addUnclusteredLayerLocal() {
         //Creating a marker layer for single data points
-        val unclustered = SymbolLayer(id, id)
+        val unclustered = SymbolLayer(LOCAL_REPORTS_ID, REMOTE_REPORTS_ID)
         unclustered.setProperties(
-            iconImage(getMarkerIcon()),
+            iconImage(LOCAL_MARKER_ICON),
             iconSize(
                 Expression.division(
                     Expression.get("object_speed"), Expression.literal(4.0f)
                 )
             )
         )
+        unclustered.setFilter(Expression.has("sync"))
         loadedMapStyle.addLayer(unclustered)
     }
 
@@ -106,7 +115,7 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
         )
         for (i in layers.indices) {
             //Add clusters' circles
-            val circles = CircleLayer("${id}_cluster_$i", id)
+            val circles = CircleLayer("reports_cluster_$i", REMOTE_REPORTS_ID)
             circles.setProperties(
                 circleColor(layers[i][2]),
                 circleRadius(layers[i][1].toFloat())
@@ -128,7 +137,7 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
         }
 
         //Add the count labels
-        val count = SymbolLayer("${id}_count", id)
+        val count = SymbolLayer("reports_count", REMOTE_REPORTS_ID)
         count.setProperties(
             textField(Expression.toString(Expression.get("point_count"))),
             textSize(12f),

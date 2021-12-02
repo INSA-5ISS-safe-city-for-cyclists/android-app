@@ -14,7 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.insa.iss.safecityforcyclists.R
-import com.insa.iss.safecityforcyclists.reports.LocalDangerReportsViewModel
+import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 import com.insa.iss.safecityforcyclists.upload.UploadListAdapter
 import com.mapbox.geojson.Feature
 
@@ -22,7 +22,7 @@ import com.mapbox.geojson.Feature
 class UploadSummaryBottomSheetDialog(private val onItemPressedCallback: (item: Feature, position: Int) -> Unit) : BottomSheetDialogFragment() {
 
     private val uploadListAdapter = UploadListAdapter()
-    private val viewModel: LocalDangerReportsViewModel by activityViewModels()
+    private val viewModel: DangerReportsViewModel by activityViewModels()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = BottomSheetDialog(requireContext(), theme)
@@ -64,13 +64,13 @@ class UploadSummaryBottomSheetDialog(private val onItemPressedCallback: (item: F
         }
 
         uploadRecyclerView.adapter = uploadListAdapter
-        uploadListAdapter.dataSet = viewModel.getFeatures().value?.features()
-        println(viewModel.getFeatures().value?.features())
+        uploadListAdapter.dataSet = viewModel.getLocalFeatures().value?.features()
+        println(viewModel.getLocalFeatures().value?.features())
         uploadListAdapter.onItemPressedCallback = { item, position ->
             onItemPressedCallback(item, position)
         }
 
-        viewModel.getFeatures().observe(viewLifecycleOwner, { list ->
+        viewModel.getLocalFeatures().observe(viewLifecycleOwner, { list ->
             uploadListAdapter.dataSet = list?.features()
         })
         uploadRecyclerView.layoutManager = LinearLayoutManager(requireActivity())

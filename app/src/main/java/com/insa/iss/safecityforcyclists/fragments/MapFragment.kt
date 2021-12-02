@@ -13,8 +13,7 @@ import com.insa.iss.safecityforcyclists.MainActivity
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.location.Location
 import com.insa.iss.safecityforcyclists.reports.DangerReports
-import com.insa.iss.safecityforcyclists.reports.LocalDangerReportsViewModel
-import com.insa.iss.safecityforcyclists.reports.RemoteDangerReportsViewModel
+import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 import com.insa.iss.safecityforcyclists.routing.RouteViewModel
 import com.insa.iss.safecityforcyclists.routing.Routing
 import com.insa.iss.safecityforcyclists.search.SearchResultsViewModel
@@ -42,14 +41,12 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     private var mapboxMap: MapboxMap? = null
     private var symbolManager: SymbolManager? = null
     private var routing: Routing? = null
-    private var remoteDangerReports: DangerReports? = null
-    private var localDangerReports: DangerReports? = null
+    private var dangerReports: DangerReports? = null
     private var location: Location? = null
     private var pinSelector: PinSelector? = null
     private val searchResultsViewModel: SearchResultsViewModel by activityViewModels()
     private val routeViewModel: RouteViewModel by activityViewModels()
-    private val remoteDangerReportsViewModel: RemoteDangerReportsViewModel by activityViewModels()
-    private val localDangerReportsViewModel: LocalDangerReportsViewModel by activityViewModels()
+    private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
     private var uploadFAB: FloatingActionButton? = null
 
     private fun makeCustomGeoapifyStyle(): Style.Builder {
@@ -62,8 +59,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireActivity())
-        remoteDangerReportsViewModel.initData()
-        localDangerReportsViewModel.initData()
+        dangerReportsViewModel.initData()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -126,10 +122,8 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 // Init classes
                 symbolManager = SymbolManager(mapView!!, map, style)
 
-                remoteDangerReports =
-                    DangerReports(style, this, remoteDangerReportsViewModel, REMOTE_REPORTS_ID, true)
-                localDangerReports =
-                    DangerReports(style, this, localDangerReportsViewModel, LOCAL_REPORTS_ID)
+                dangerReports =
+                    DangerReports(style, this, dangerReportsViewModel)
 
                 location = Location(style, map, requireActivity(), view.findViewById(R.id.gpsFAB))
                 location?.onResume()
@@ -140,7 +134,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                     map,
                     requireActivity(),
                     symbolManager?.layerId!!,
-                    remoteDangerReportsViewModel,
+                    dangerReportsViewModel,
                     location!!,
                     routeViewModel
                 )

@@ -11,11 +11,11 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
-import com.insa.iss.safecityforcyclists.reports.LocalDangerReportsViewModel
+import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 
-class DeubgAddReportDialogFragment : DialogFragment() {
+class DebugAddReportDialogFragment : DialogFragment() {
 
-    private val localDangerReportsViewModel: LocalDangerReportsViewModel by activityViewModels()
+    private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
 
     lateinit var customView: View
 
@@ -60,7 +60,7 @@ class DeubgAddReportDialogFragment : DialogFragment() {
             (customView.findViewById(R.id.longitude) as EditText).text.toString().toDoubleOrNull() ?: 0.0
         val sync = (customView.findViewById(R.id.sync) as CheckBox).isChecked
 
-        localDangerReportsViewModel.addReports(
+        dangerReportsViewModel.addLocalReports(
             listOf(
                 LocalReport(
                     timestamp = timestamp,

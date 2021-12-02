@@ -8,11 +8,11 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
-import com.insa.iss.safecityforcyclists.reports.LocalDangerReportsViewModel
+import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 
 class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
-    private val localDangerReportsViewModel: LocalDangerReportsViewModel by activityViewModels()
+    private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
     private var quickRemoveButton: FloatingActionButton? = null
     private var deleteReportFAB: FloatingActionButton? = null
 
@@ -25,11 +25,11 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
         quickRemoveButton = view.findViewById(R.id.quickRemoveFAB)
         deleteReportFAB = view.findViewById(R.id.deleteReportFAB)
 
-        localDangerReportsViewModel.getFeatures().value?.features()?.size?.let { size ->
+        dangerReportsViewModel.getLocalFeatures().value?.features()?.size?.let { size ->
             setRemoveButtonState(size > 0)
         }
 
-        localDangerReportsViewModel.getFeatures().observe(viewLifecycleOwner, { featureCollection ->
+        dangerReportsViewModel.getLocalFeatures().observe(viewLifecycleOwner, { featureCollection ->
             featureCollection?.features()?.size?.let { size ->
                 setRemoveButtonState(size > 0)
             }
@@ -37,11 +37,11 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
         // Add dummy report
         view.findViewById<FloatingActionButton>(R.id.quickAddFAB).setOnClickListener {
-            var size = localDangerReportsViewModel.getFeatures().value?.features()?.size
+            var size = dangerReportsViewModel.getLocalFeatures().value?.features()?.size
             if (size == null) {
                 size = 0
             }
-            localDangerReportsViewModel.addReports(
+            dangerReportsViewModel.addLocalReports(
                 listOf(
                     LocalReport(
                         timestamp = size + 1,
@@ -58,17 +58,17 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
         // Remove last report
         quickRemoveButton?.setOnClickListener {
-            localDangerReportsViewModel.getFeatures().value?.features()?.let { features ->
+            dangerReportsViewModel.getLocalFeatures().value?.features()?.let { features ->
                 if (features.size > 0) {
                     features.last().properties()?.get("id")?.asInt?.let { id ->
-                        localDangerReportsViewModel.deleteReportsById(listOf(id))
+                        dangerReportsViewModel.deleteLocalReportsById(listOf(id))
                     }
                 }
             }
         }
 
         view.findViewById<FloatingActionButton>(R.id.addReportFAB).setOnClickListener {
-            val dialog = DeubgAddReportDialogFragment()
+            val dialog = DebugAddReportDialogFragment()
             dialog.show(parentFragmentManager, "Dialog")
         }
 
@@ -86,11 +86,11 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
         }
 
         view.findViewById<FloatingActionButton>(R.id.syncAllReportsFAB).setOnClickListener {
-            localDangerReportsViewModel.syncReportsById((0..500).toList())
+            dangerReportsViewModel.syncLocalReportsById((0..500).toList())
         }
 
         view.findViewById<FloatingActionButton>(R.id.unsyncAllReportsFAB).setOnClickListener {
-            localDangerReportsViewModel.unsyncReportsById((0..500).toList())
+            dangerReportsViewModel.unsyncLocalReportsById((0..500).toList())
         }
 
         super.onViewCreated(view, savedInstanceState)
@@ -98,7 +98,7 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
     //method for read records from database in ListView
     private fun viewRecord(): String {
-        val localReports = localDangerReportsViewModel.getFeatures().value
+        val localReports = dangerReportsViewModel.getLocalFeatures().value
         var result = ""
         localReports?.features()?.iterator()?.forEach { feature ->
             result += "*${feature.properties()}\n"

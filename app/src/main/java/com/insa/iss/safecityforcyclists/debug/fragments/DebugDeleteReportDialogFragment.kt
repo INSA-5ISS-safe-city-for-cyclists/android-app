@@ -9,12 +9,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.insa.iss.safecityforcyclists.R
-import com.insa.iss.safecityforcyclists.reports.LocalDangerReportsViewModel
+import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 
 class DebugDeleteReportDialogFragment : DialogFragment() {
 
     lateinit var customView: View
-    private val localDangerReportsViewModel: LocalDangerReportsViewModel by activityViewModels()
+    private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -36,17 +36,17 @@ class DebugDeleteReportDialogFragment : DialogFragment() {
                 .setNegativeButton(
                     "Cancel"
                 ) { _, _ ->
-                    getDialog()?.cancel()
+                    dialog?.cancel()
                 }
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
-    fun deleteReport() {
-        val from_id =
+    private fun deleteReport() {
+        val fromId =
             (customView.findViewById(R.id.from_id) as EditText).text.toString().toIntOrNull() ?: 0
-        val to_id =
+        val toId =
             (customView.findViewById(R.id.to_id) as EditText).text.toString().toIntOrNull() ?: 0
-        localDangerReportsViewModel.deleteReportsById((from_id..to_id).toList())
+        dangerReportsViewModel.deleteLocalReportsById((fromId..toId).toList())
     }
 }
