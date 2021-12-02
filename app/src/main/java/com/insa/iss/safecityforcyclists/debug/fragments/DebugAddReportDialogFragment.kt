@@ -47,7 +47,7 @@ class DebugAddReportDialogFragment : DialogFragment() {
 
     fun saveReport() {
         val timestamp =
-            (customView.findViewById(R.id.timestamp) as EditText).text.toString().toIntOrNull() ?: 0
+            (customView.findViewById(R.id.timestamp) as EditText).text.toString().toLongOrNull() ?: 0
         val distance =
             (customView.findViewById(R.id.distance) as EditText).text.toString().toDoubleOrNull() ?: 0.0
         val objectSpeed =

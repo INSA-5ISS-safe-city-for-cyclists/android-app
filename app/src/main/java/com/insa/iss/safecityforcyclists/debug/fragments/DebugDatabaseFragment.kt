@@ -9,6 +9,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
+import java.util.*
 
 class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
@@ -44,7 +45,7 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
             dangerReportsViewModel.addLocalReports(
                 listOf(
                     LocalReport(
-                        timestamp = size + 1,
+                        timestamp = Date().time,
                         distance = (size + 2).toDouble(),
                         objectSpeed = (size + 3).toDouble(),
                         bicycleSpeed =(size + 4).toDouble(),
