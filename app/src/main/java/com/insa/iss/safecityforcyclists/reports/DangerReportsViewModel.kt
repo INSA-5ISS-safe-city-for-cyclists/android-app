@@ -13,11 +13,13 @@ import com.mapbox.geojson.FeatureCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.net.URL
 
 class DangerReportsViewModel(application: Application) : AndroidViewModel(application) {
     private val remoteFeatures = MutableLiveData<FeatureCollection?>()
     private val localFeatures = MutableLiveData<FeatureCollection?>()
+    private val dangerClassification = MutableLiveData<DangerClassification?>()
     private var db: LocalReportDatabase? = null
 
     init {
@@ -42,10 +44,21 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
+    @Suppress("BlockingMethodInNonBlockingContext")
+    private suspend fun makeClassificationRequest(): DangerClassification {
+        return withContext(Dispatchers.IO) {
+            // TODO set URL
+            return@withContext DangerClassification(JSONObject(URL("").readText()))
+        }
+    }
+
     fun initData() {
         viewModelScope.launch {
             // Remote Data
             remoteFeatures.value = makeRequest()
+            // Danger classification
+//            dangerClassification.value = makeClassificationRequest()
+
             // Local Data
             val localReports = getReports()
             val featureList = ArrayList<Feature>()

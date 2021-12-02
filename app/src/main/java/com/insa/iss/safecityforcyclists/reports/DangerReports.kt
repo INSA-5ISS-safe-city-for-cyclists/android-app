@@ -23,7 +23,6 @@ class DangerReports(
     fragment: Fragment,
     private val viewModel: DangerReportsViewModel
 ) {
-
     init {
         loadGeoJsonSource()
         addUnclusteredLayerRemote()
@@ -42,7 +41,7 @@ class DangerReports(
     private fun getCombinedReports(): FeatureCollection? {
         val localFeatures = viewModel.getLocalFeatures().value
         val remoteFeatures = viewModel.getRemoteFeatures().value
-        if (localFeatures != null && remoteFeatures != null) {
+        return if (localFeatures != null && remoteFeatures != null) {
             val totalFeatures = ArrayList<Feature>()
             localFeatures.features()?.let {
                 totalFeatures.addAll(it)
@@ -50,12 +49,8 @@ class DangerReports(
             remoteFeatures.features()?.let {
                 totalFeatures.addAll(it)
             }
-            return FeatureCollection.fromFeatures(totalFeatures)
-        } else if (localFeatures != null) {
-            return localFeatures
-        } else {
-            return remoteFeatures
-        }
+            FeatureCollection.fromFeatures(totalFeatures)
+        } else localFeatures ?: remoteFeatures
     }
 
 
