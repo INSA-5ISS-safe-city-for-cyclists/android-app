@@ -8,8 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.insa.iss.safecityforcyclists.R
+import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 import com.mapbox.geojson.Feature
 import java.util.*
 
@@ -21,6 +23,8 @@ class DangerReportBottomSheetDialog(
     private var title: TextView? = null
     private var subtitle: TextView? = null
     private var deleteButton: Button? = null
+
+    private val viewModel: DangerReportsViewModel by activityViewModels()
 
 
     override fun onCreateView(
@@ -53,6 +57,12 @@ class DangerReportBottomSheetDialog(
         title = view.findViewById(R.id.title)
         subtitle = view.findViewById(R.id.subtitle)
         deleteButton = view.findViewById(R.id.deleteButton)
+        deleteButton?.setOnClickListener {
+            feature.properties()?.get("id")?.asInt?.let {
+                viewModel.deleteLocalReportsById(listOf(it))
+                dismiss()
+            }
+        }
 
         feature.properties()?.let { p ->
             p.get("timestamp")?.asLong?.let {
