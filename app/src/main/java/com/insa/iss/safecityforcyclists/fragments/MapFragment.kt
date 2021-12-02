@@ -63,18 +63,26 @@ class MapFragment : Fragment(R.layout.map_fragment) {
         dangerReportsViewModel.initData()
     }
 
+    private fun openUploadModal() {
+        val bottomSheet = UploadSummaryBottomSheetDialog { sheet, item, position ->
+            println("Pressed $item at position $position")
+            pinSelector?.showReportModal(item, {
+                openUploadModal()
+            }, true)
+            sheet.dismiss()
+        }
+        bottomSheet.show(
+            requireActivity().supportFragmentManager,
+            "ModalBottomSheet"
+        )
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState) // Get the MapBox context
         setupMap(view, savedInstanceState)
         uploadFAB = view.findViewById(R.id.uploadFAB)
         uploadFAB?.setOnClickListener {
-            val bottomSheet = UploadSummaryBottomSheetDialog { item, position ->
-                println("Pressed $item at position $position")
-            }
-            bottomSheet.show(
-                requireActivity().supportFragmentManager,
-                "ModalBottomSheet"
-            )
+           openUploadModal()
         }
 
         // Debug database

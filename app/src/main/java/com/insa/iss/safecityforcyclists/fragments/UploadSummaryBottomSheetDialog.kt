@@ -19,7 +19,7 @@ import com.insa.iss.safecityforcyclists.upload.UploadListAdapter
 import com.mapbox.geojson.Feature
 
 
-class UploadSummaryBottomSheetDialog(private val onItemPressedCallback: (item: Feature, position: Int) -> Unit) : BottomSheetDialogFragment() {
+class UploadSummaryBottomSheetDialog(private val onItemPressedCallback: (bottomSheet: UploadSummaryBottomSheetDialog, item: Feature, position: Int) -> Unit) : BottomSheetDialogFragment() {
 
     private val uploadListAdapter = UploadListAdapter()
     private val viewModel: DangerReportsViewModel by activityViewModels()
@@ -75,10 +75,10 @@ class UploadSummaryBottomSheetDialog(private val onItemPressedCallback: (item: F
         updateDataset()
         println(uploadListAdapter.dataSet)
         uploadListAdapter.onItemPressedCallback = { item, position ->
-            onItemPressedCallback(item, position)
+            onItemPressedCallback(this, item, position)
         }
 
-        viewModel.getLocalFeatures().observe(viewLifecycleOwner, { list ->
+        viewModel.getLocalFeatures().observe(viewLifecycleOwner, {
             updateDataset()
         })
         uploadRecyclerView.layoutManager = LinearLayoutManager(requireActivity())

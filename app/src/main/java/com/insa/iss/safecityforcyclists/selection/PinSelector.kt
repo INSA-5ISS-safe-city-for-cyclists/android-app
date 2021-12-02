@@ -10,6 +10,7 @@ import com.insa.iss.safecityforcyclists.fragments.WaypointBottomSheetDialog
 import com.insa.iss.safecityforcyclists.routing.Routing
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -19,7 +20,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.*
 class PinSelector(
     private val activity: FragmentActivity,
     mapView: MapView,
-    private val map: MapboxMap,
+    private val mapboxMap: MapboxMap,
     style: Style,
     private val routing: Routing?,
     private val symbolManager: SymbolManager?
@@ -44,21 +45,25 @@ class PinSelector(
                 onBackPressedCallback?.isEnabled = false
             }
         }
-        circleManager = CircleManager(mapView, map, style)
+        circleManager = CircleManager(mapView, mapboxMap, style)
         // Init callbacks
         activity.onBackPressedDispatcher.addCallback(activity, onBackPressedCallback!!)
         symbolManager?.addClickListener { it ->
             removeRouteWaypoint(it)
             true
         }
-        map.addOnMapClickListener { point: LatLng ->
-            onMapClick(map, point)
+        mapboxMap.addOnMapClickListener { point: LatLng ->
+            onMapClick(mapboxMap, point)
             return@addOnMapClickListener true
         }
-        map.addOnMapLongClickListener { point: LatLng ->
+        mapboxMap.addOnMapLongClickListener { point: LatLng ->
             onMapLongClick(point)
             return@addOnMapLongClickListener true
         }
+    }
+
+    private fun centerMapOnSelection(selection: LatLng) {
+        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(selection, 15.0))
     }
 
     private fun onMapClick(map: MapboxMap, point: LatLng) {
@@ -96,12 +101,18 @@ class PinSelector(
         showWaypointModal(feature)
     }
 
-    private fun showReportModal(feature: Feature) {
+    fun showReportModal(feature: Feature, onDismiss: (() -> Unit)? = null, centerMapOnFeature: Boolean = false) {
         val p = feature.geometry() as Point
         val point = LatLng(p.latitude(), p.longitude())
         showSelectionCircle(point)
         val bottomSheet = DangerReportBottomSheetDialog(feature) {
             hideSelectionCircle()
+            onDismiss?.let {
+                it()
+            }
+        }
+        if (centerMapOnFeature) {
+            centerMapOnSelection(point)
         }
         bottomSheet.show(
             activity.supportFragmentManager,
