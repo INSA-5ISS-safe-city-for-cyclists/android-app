@@ -35,6 +35,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     companion object {
         const val REMOTE_REPORTS_ID = "REMOTE_REPORTS"
         const val LOCAL_REPORTS_ID = "LOCAL_REPORTS"
+        const val LOCAL_REPORTS_UNSYNC_ID = "LOCAL_REPORTS_UNSYNC"
     }
 
     private var mapView: MapView? = null
@@ -165,6 +166,8 @@ class MapFragment : Fragment(R.layout.map_fragment) {
             ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon, null)
         val localMarkerIconDrawable =
             ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon_local, null)
+        val localMarkerUnsyncIconDrawable =
+            ResourcesCompat.getDrawable(this.resources, R.drawable.ic_marker_icon_local_unsync, null)
         val waypointIconDrawable =
             ResourcesCompat.getDrawable(this.resources, R.drawable.ic_waypoint_icon, null)
         val destinationIconDrawable =
@@ -183,6 +186,10 @@ class MapFragment : Fragment(R.layout.map_fragment) {
         style.addImage(
             MainActivity.LOCAL_MARKER_ICON,
             BitmapUtils.getBitmapFromDrawable(localMarkerIconDrawable)!!,
+        )
+        style.addImage(
+            MainActivity.LOCAL_MARKER_UNSYNC_ICON,
+            BitmapUtils.getBitmapFromDrawable(localMarkerUnsyncIconDrawable)!!,
         )
         style.addImage(
             MainActivity.WAYPOINT_ICON,

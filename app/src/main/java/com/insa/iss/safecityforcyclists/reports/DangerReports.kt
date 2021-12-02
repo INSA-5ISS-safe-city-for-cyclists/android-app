@@ -3,8 +3,10 @@ package com.insa.iss.safecityforcyclists.reports
 import android.graphics.Color
 import androidx.fragment.app.Fragment
 import com.insa.iss.safecityforcyclists.MainActivity.Companion.LOCAL_MARKER_ICON
+import com.insa.iss.safecityforcyclists.MainActivity.Companion.LOCAL_MARKER_UNSYNC_ICON
 import com.insa.iss.safecityforcyclists.MainActivity.Companion.MARKER_ICON
 import com.insa.iss.safecityforcyclists.fragments.MapFragment.Companion.LOCAL_REPORTS_ID
+import com.insa.iss.safecityforcyclists.fragments.MapFragment.Companion.LOCAL_REPORTS_UNSYNC_ID
 import com.insa.iss.safecityforcyclists.fragments.MapFragment.Companion.REMOTE_REPORTS_ID
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -16,12 +18,17 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 
-class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, private val viewModel: DangerReportsViewModel) {
+class DangerReports(
+    private val loadedMapStyle: Style,
+    fragment: Fragment,
+    private val viewModel: DangerReportsViewModel
+) {
 
     init {
         loadGeoJsonSource()
         addUnclusteredLayerRemote()
         addUnclusteredLayerLocal()
+        addUnclusteredLayerLocalUnsync()
         addClusteredLayers()
 
         viewModel.getRemoteFeatures().observe(fragment.viewLifecycleOwner, {
@@ -102,6 +109,26 @@ class DangerReports(private val loadedMapStyle: Style, fragment: Fragment, priva
             )
         )
         unclustered.setFilter(Expression.has("sync"))
+        loadedMapStyle.addLayer(unclustered)
+    }
+
+    private fun addUnclusteredLayerLocalUnsync() {
+        //Creating a marker layer for single data points
+        val unclustered = SymbolLayer(LOCAL_REPORTS_UNSYNC_ID, REMOTE_REPORTS_ID)
+        unclustered.setProperties(
+            iconImage(LOCAL_MARKER_UNSYNC_ICON),
+            iconSize(
+                Expression.division(
+                    Expression.get("object_speed"), Expression.literal(4.0f)
+                )
+            )
+        )
+        unclustered.setFilter(
+            Expression.all(
+                Expression.has("sync"),
+                Expression.eq(Expression.get("sync"), false)
+            )
+        )
         loadedMapStyle.addLayer(unclustered)
     }
 

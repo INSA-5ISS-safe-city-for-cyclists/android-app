@@ -66,29 +66,27 @@ class PinSelector(
         val screenPoint: PointF = map.projection.toScreenLocation(point)
         // Query the source layer in that location
         val remoteReportsFeatures: List<Feature> =
-            map.queryRenderedFeatures(screenPoint, MapFragment.REMOTE_REPORTS_ID)
+            map.queryRenderedFeatures(
+                screenPoint,
+                MapFragment.REMOTE_REPORTS_ID,
+                MapFragment.LOCAL_REPORTS_ID,
+                MapFragment.LOCAL_REPORTS_UNSYNC_ID
+            )
         if (remoteReportsFeatures.isNotEmpty()) {
             val feature: Feature = remoteReportsFeatures[0]
             showReportModal(feature)
         } else {
-            val localReportsFeatures: List<Feature> =
-                map.queryRenderedFeatures(screenPoint, MapFragment.LOCAL_REPORTS_ID)
-            if (localReportsFeatures.isNotEmpty()) {
-                val feature: Feature = localReportsFeatures[0]
-                showReportModal(feature)
-            } else {
-                val features: List<Feature> =
-                    map.queryRenderedFeatures(
-                        screenPoint,
-                        "poi-level-3",
-                        "poi-level-2",
-                        "poi-level-1",
-                        "poi-railway"
-                    )
-                if (features.isNotEmpty()) {
-                    val feature: Feature = features[0]
-                    showWaypointModal(feature)
-                }
+            val features: List<Feature> =
+                map.queryRenderedFeatures(
+                    screenPoint,
+                    "poi-level-3",
+                    "poi-level-2",
+                    "poi-level-1",
+                    "poi-railway"
+                )
+            if (features.isNotEmpty()) {
+                val feature: Feature = features[0]
+                showWaypointModal(feature)
             }
         }
     }
