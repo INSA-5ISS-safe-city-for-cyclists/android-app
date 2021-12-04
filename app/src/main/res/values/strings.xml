@@ -6,4 +6,13 @@
     <string name="user_location_permission_explanation">Voir la position sur la carte</string>
     <string name="user_location_permission_not_granted">Accès à la position refusé</string>
     <string name="search_hint">Rechercher…</string>
+    <string name="bluetooth_not_supported">Bluetooth non supporté</string>
+    <string name="ble_not_supported">BLE non supporté</string>
+    <string name="bluetooth_permission_not_granted">Accès au Bluetooth a été refusé</string>
+    <string name="ble_start_scan">Debut du scan BLE</string>
+    <string name="ble_stop_scan">Arrêt du scan BLE</string>
+    <string name="ble_device_found">Appareil détecté: %1$s</string>
+    <string name="ble_device_connected">Appareil connecté: %1$s</string>
+    <string name="ble_already_connected">Appareil déjà connecté: %1$s</string>
+    <string name="ble_device_disconnected">Appareil déconnecté</string>
 </resources>

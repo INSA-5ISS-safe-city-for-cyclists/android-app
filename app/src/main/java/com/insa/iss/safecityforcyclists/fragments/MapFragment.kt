@@ -1,8 +1,14 @@
 package com.insa.iss.safecityforcyclists.fragments
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -11,6 +17,7 @@ import androidx.fragment.app.commit
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.MainActivity
 import com.insa.iss.safecityforcyclists.R
+import com.insa.iss.safecityforcyclists.bluetooth.BluetoothHandler
 import com.insa.iss.safecityforcyclists.location.Location
 import com.insa.iss.safecityforcyclists.reports.DangerReports
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
@@ -50,6 +57,9 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
     private var uploadFAB: FloatingActionButton? = null
 
+    private lateinit var bluetoothHandler: BluetoothHandler
+    private lateinit var startForResult: ActivityResultLauncher<Intent>
+
     private fun makeCustomGeoapifyStyle(): Style.Builder {
         val builder = Style.Builder()
         val inputStream = resources.openRawResource(R.raw.osm_bright_cycleways)
@@ -61,6 +71,14 @@ class MapFragment : Fragment(R.layout.map_fragment) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireActivity())
         dangerReportsViewModel.initData()
+
+        startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                startScanning()
+            } else {
+                Toast.makeText(activity, R.string.bluetooth_permission_not_granted, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun openUploadModal() {
@@ -77,8 +95,20 @@ class MapFragment : Fragment(R.layout.map_fragment) {
         )
     }
 
+    private fun startScanning() {
+        bluetoothHandler.startScanning()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState) // Get the MapBox context
+
+        bluetoothHandler = BluetoothHandler.getInstance(
+            requireActivity() as AppCompatActivity,
+            view.findViewById(R.id.bleFAB),
+            dangerReportsViewModel,
+            startForResult
+        )
+
         setupMap(view, savedInstanceState)
         uploadFAB = view.findViewById(R.id.uploadFAB)
         uploadFAB?.setOnClickListener {

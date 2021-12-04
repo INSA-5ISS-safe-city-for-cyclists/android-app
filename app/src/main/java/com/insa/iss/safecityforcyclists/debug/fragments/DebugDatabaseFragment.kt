@@ -5,10 +5,13 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.viewModelScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
+import com.insa.iss.safecityforcyclists.bluetooth.BluetoothHandler
 import com.insa.iss.safecityforcyclists.database.LocalReport
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
+import kotlinx.coroutines.launch
 import java.util.*
 
 class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
@@ -42,19 +45,34 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
             if (size == null) {
                 size = 0
             }
-            dangerReportsViewModel.addLocalReports(
-                listOf(
-                    LocalReport(
-                        timestamp = Date().time,
-                        distance = (size + 2).toDouble(),
-                        objectSpeed = (size + 3).toDouble(),
-                        bicycleSpeed =(size + 4).toDouble(),
-                        latitude = 43.6020 + (size).toDouble() * 0.01,
-                        longitude = 1.4530 + (size).toDouble() * 0.01,
-                        sync = false
-                    )
-                )
+            val bluetoothHandler = BluetoothHandler.getInstance(null, null, null, null)
+//            dangerReportsViewModel.addLocalReports(
+//                listOf(
+//                    LocalReport(
+//                        timestamp = Date().time,
+//                        distance = (size + 2).toDouble(),
+//                        objectSpeed = (size + 3).toDouble(),
+//                        bicycleSpeed =(size + 4).toDouble(),
+//                        latitude = 43.6020 + (size).toDouble() * 0.01,
+//                        longitude = 1.4530 + (size).toDouble() * 0.01,
+//                        sync = false
+//                    )
+//                )
+//            )
+            val report = LocalReport(
+                timestamp = Date().time,
+                distance = (size + 2).toDouble(),
+                objectSpeed = (size + 3).toDouble(),
+                bicycleSpeed = (size + 4).toDouble(),
+                latitude = 43.6020 + (size).toDouble() * 0.01,
+                longitude = 1.4530 + (size).toDouble() * 0.01,
+                sync = false
             )
+            dangerReportsViewModel.viewModelScope.launch {
+                if (!bluetoothHandler.write(report)) {
+                    dangerReportsViewModel.addLocalReports(listOf(report))
+                }
+            }
         }
 
         // Remove last report
