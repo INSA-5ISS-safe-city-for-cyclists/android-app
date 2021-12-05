@@ -182,6 +182,7 @@ internal class BluetoothHandler private constructor(
         if (!bluetoothAdapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startForResult.launch(enableBtIntent)
+            ok = false
         }
 
         return ok
@@ -284,6 +285,9 @@ internal class BluetoothHandler private constructor(
             peripheral.observe(it) { value ->
                 val parser = BluetoothBytesParser(value, ByteOrder.LITTLE_ENDIAN)
                 val sensorValue = parser.getStringValue(0)
+                Log.d(TAG,value.fold("",{
+                    acc, byte ->  byte.toString() + acc
+                }))
                 Log.d(TAG, sensorValue)
 
                 // Parse JSON
@@ -322,6 +326,16 @@ internal class BluetoothHandler private constructor(
 
     suspend fun write(report: LocalReport): Boolean {
         return if (connected) {
+//            val testReport = LocalReport(
+//                timestamp = 193699,
+//                distance = 10.0,
+//                objectSpeed = 20.0,
+//                bicycleSpeed = 1.0,
+//                latitude = 25.0,
+//                longitude = 45.0,
+//                sync = false
+//            )
+//            val json = testReport.toJSON()
             val json = report.toJSON()
             json.put("date", "4/12/2021")
             val jsonString = json.toString().replace("\\","")
