@@ -1,5 +1,6 @@
 package com.insa.iss.safecityforcyclists.location
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
@@ -7,10 +8,12 @@ import android.content.Context
 import android.content.Context.LOCATION_SERVICE
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
@@ -32,6 +35,8 @@ class Location(
     private val activity: Activity,
     private var gpsButton: FloatingActionButton
 ) : PermissionsListener {
+    private val locationRequestCode = 1
+
     private var permissionsManager: PermissionsManager = PermissionsManager(this)
     private val locationManager = activity.getSystemService(LOCATION_SERVICE) as LocationManager
 
@@ -100,6 +105,7 @@ class Location(
             override fun onCameraTrackingDismissed() {
                 gpsButton.setImageDrawable(gpsNotFixedDrawable)
             }
+
             override fun onCameraTrackingChanged(currentMode: Int) {
                 gpsButton.setImageDrawable(gpsFixedDrawable)
             }
@@ -107,8 +113,31 @@ class Location(
 
         updateLocationComponent()
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0f, locationListener)
-
+        // Verify that the permissions are granted before trying to requestLocationUpdates
+        // Fix error : "gps" location provider requires ACCESS_FINE_LOCATION permission.
+        if (ActivityCompat.checkSelfPermission(
+                activity,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                activity,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            activity.requestPermissions(
+                arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ),
+                locationRequestCode
+            )
+        } else {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                2000,
+                0f,
+                locationListener
+            )
+        }
         gpsButton.setOnClickListener {
             if (!PermissionsManager.areLocationPermissionsGranted(activity)) {
                 permissionsManager.requestLocationPermissions(activity)
@@ -116,10 +145,11 @@ class Location(
                 if (lastLocation != null) {
                     locationComponent?.cameraMode = CameraMode.TRACKING
                 } else {
-                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,  {
+                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, {
                         locationComponent?.cameraMode = CameraMode.TRACKING
                     }, null)
-                    Toast.makeText(activity, "Location unknown, searching...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, "Location unknown, searching...", Toast.LENGTH_SHORT)
+                        .show()
                 }
             } else {
                 Toast.makeText(activity, "Location not enabled", Toast.LENGTH_SHORT).show()
@@ -127,8 +157,11 @@ class Location(
         }
     }
 
-    private fun checkPermissions() : Boolean {
-        return if (PermissionsManager.areLocationPermissionsGranted(activity) && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+    private fun checkPermissions(): Boolean {
+        return if (PermissionsManager.areLocationPermissionsGranted(activity) && locationManager.isProviderEnabled(
+                LocationManager.GPS_PROVIDER
+            )
+        ) {
             true
         } else {
             lastLocation = null
@@ -160,7 +193,7 @@ class Location(
     }
 
     override fun onExplanationNeeded(permissionsToExplain: List<String?>?) {
-        Toast.makeText(activity, R.string.user_location_permission_explanation, Toast.LENGTH_LONG)
+        Toast.makeText(activity, R.string.user_location_permission_explanation, Toast.LENGTH_SHORT)
             .show()
     }
 
@@ -171,14 +204,17 @@ class Location(
             Toast.makeText(
                 activity,
                 R.string.user_location_permission_not_granted,
-                Toast.LENGTH_LONG
+                Toast.LENGTH_SHORT
             )
                 .show()
         }
     }
 
     fun onResume() {
-        activity.registerReceiver(gpsSwitchStateReceiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
+        activity.registerReceiver(
+            gpsSwitchStateReceiver,
+            IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
+        )
     }
 
     fun onDestroy() {

@@ -33,7 +33,8 @@ class MainActivity : AppCompatActivity() {
             queryHint = getString(R.string.search_hint)
             setOnQueryTextFocusChangeListener { _, focused ->
                 if (focused) {
-                    supportFragmentManager.commit {
+                    // allowStateLoss fixes the bug : Can not perform this action after onSaveInstanceState
+                    supportFragmentManager.commit (true){
                         setReorderingAllowed(true)
                         add<SearchFragment>(R.id.fragment_container_view)
                         addToBackStack("search")
