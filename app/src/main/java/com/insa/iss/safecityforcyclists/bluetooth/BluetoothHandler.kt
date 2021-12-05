@@ -86,12 +86,12 @@ internal class BluetoothHandler private constructor(
     private fun PackageManager.missingSystemFeature(name: String): Boolean = !hasSystemFeature(name)
     private var bluetoothManager: BluetoothManager =
         activity.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    private var bluetoothAdapter: BluetoothAdapter = bluetoothManager.adapter
+    private var bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
     // Blessed android coroutines
 
     @JvmField
-    var central: BluetoothCentralManager = BluetoothCentralManager(activity)
+    var central: BluetoothCentralManager? = null
 
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -118,23 +118,28 @@ internal class BluetoothHandler private constructor(
     private var connectedDevice: BluetoothPeripheral? = null
 
     init {
-        central.observeConnectionState { peripheral, state ->
-            Log.d(TAG, "Peripheral ${peripheral.name} has $state")
-            when (state) {
-                ConnectionState.CONNECTED -> handlePeripheral(peripheral)
-                ConnectionState.DISCONNECTED -> scope.launch {
-                    connected = false
-                    connectedDevice = null
-                    bleButton.setImageDrawable(bleOffDrawable)
-                    activity.runOnUiThread {
-                        Toast.makeText(
-                            activity,
-                            R.string.ble_device_disconnected,
-                            Toast.LENGTH_SHORT
-                        ).show()
+        if (bluetoothAdapter == null) {
+            Toast.makeText(activity, R.string.bluetooth_not_supported, Toast.LENGTH_SHORT).show()
+        } else {
+            central = BluetoothCentralManager(activity)
+            central!!.observeConnectionState { peripheral, state ->
+                Log.d(TAG, "Peripheral ${peripheral.name} has $state")
+                when (state) {
+                    ConnectionState.CONNECTED -> handlePeripheral(peripheral)
+                    ConnectionState.DISCONNECTED -> scope.launch {
+                        connected = false
+                        connectedDevice = null
+                        bleButton.setImageDrawable(bleOffDrawable)
+                        activity.runOnUiThread {
+                            Toast.makeText(
+                                activity,
+                                R.string.ble_device_disconnected,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                }
-                else -> {
+                    else -> {
+                    }
                 }
             }
         }
@@ -167,23 +172,37 @@ internal class BluetoothHandler private constructor(
 
     private fun setup(): Boolean {
         var ok = true
-        // Check to see if the Bluetooth classic feature is available.
-        packageManager.takeIf { it.missingSystemFeature(PackageManager.FEATURE_BLUETOOTH) }?.also {
+        // Check to see if the classic Bluetooth feature is available.
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
             Toast.makeText(activity, R.string.bluetooth_not_supported, Toast.LENGTH_SHORT).show()
             ok = false
-        }
-        // Check to see if the BLE feature is available.
-        packageManager.takeIf { it.missingSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE) }
-            ?.also {
+        } else {
+            // Check to see if the BLE feature is available.
+            if (!packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
                 Toast.makeText(activity, R.string.ble_not_supported, Toast.LENGTH_SHORT).show()
                 ok = false
+            } else {
+                if (bluetoothAdapter == null) {
+                    ok = false
+                } else {
+                    if (!bluetoothAdapter!!.isEnabled) {
+                        ok = false
+                        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                        startForResult.launch(enableBtIntent)
+                    }
+                }
             }
-
-        if (!bluetoothAdapter.isEnabled) {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startForResult.launch(enableBtIntent)
-            ok = false
         }
+//        packageManager.takeIf { it.missingSystemFeature(PackageManager.FEATURE_BLUETOOTH) }
+//            .also {
+//                Toast.makeText(activity, R.string.bluetooth_not_supported, Toast.LENGTH_SHORT).show()
+//                ok = false
+//            }
+//        packageManager.takeIf { it.missingSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE) }
+//            ?.also {
+//                Toast.makeText(activity, R.string.ble_not_supported, Toast.LENGTH_SHORT).show()
+//                ok = false
+//            }
 
         return ok
     }
@@ -196,7 +215,7 @@ internal class BluetoothHandler private constructor(
             R.string.ble_start_scan,
             Toast.LENGTH_SHORT
         ).show()
-        central.scanForPeripheralsWithServices(supportedServices) { peripheral, scanResult ->
+        central!!.scanForPeripheralsWithServices(supportedServices) { peripheral, scanResult ->
             Log.d(TAG, "Found peripheral '${peripheral.name}' with RSSI ${scanResult.rssi}")
             activity.runOnUiThread {
                 Toast.makeText(
@@ -211,7 +230,7 @@ internal class BluetoothHandler private constructor(
     }
 
     private fun stopScanning() {
-        central.stopScan()
+        central!!.stopScan()
         scanning = false
     }
 
@@ -223,10 +242,10 @@ internal class BluetoothHandler private constructor(
         scope.launch {
             try {
                 try {
-                    central.cancelConnection(peripheral)
+                    central!!.cancelConnection(peripheral)
                 } catch (exception: Exception) {
                 }
-                central.connectPeripheral(peripheral)
+                central!!.connectPeripheral(peripheral)
             } catch (connectionFailed: ConnectionFailedException) {
                 Log.e(TAG, "connection failed")
             }
@@ -285,8 +304,8 @@ internal class BluetoothHandler private constructor(
             peripheral.observe(it) { value ->
                 val parser = BluetoothBytesParser(value, ByteOrder.LITTLE_ENDIAN)
                 val sensorValue = parser.getStringValue(0)
-                Log.d(TAG,value.fold("",{
-                    acc, byte ->  byte.toString() + acc
+                Log.d(TAG, value.fold("", { acc, byte ->
+                    byte.toString() + acc
                 }))
                 Log.d(TAG, sensorValue)
 
@@ -338,7 +357,7 @@ internal class BluetoothHandler private constructor(
 //            val json = testReport.toJSON()
             val json = report.toJSON()
             json.put("date", "4/12/2021")
-            val jsonString = json.toString().replace("\\","")
+            val jsonString = json.toString().replace("\\", "")
             Log.d(TAG, jsonString)
             connectedDevice?.writeCharacteristic(
                 CUSTOM_SERVICE_UUID,
