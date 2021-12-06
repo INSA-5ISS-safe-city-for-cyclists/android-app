@@ -115,22 +115,7 @@ class Location(
 
         // Verify that the permissions are granted before trying to requestLocationUpdates
         // Fix error : "gps" location provider requires ACCESS_FINE_LOCATION permission.
-        if (ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            activity.requestPermissions(
-                arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ),
-                locationRequestCode
-            )
-        } else {
+        if (checkPermissions()) {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
                 2000,
