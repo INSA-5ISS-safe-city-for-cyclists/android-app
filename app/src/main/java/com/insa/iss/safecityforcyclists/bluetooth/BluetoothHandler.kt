@@ -59,22 +59,18 @@ internal class BluetoothHandler private constructor(
         @JvmStatic
         @Synchronized
         fun getInstance(
-            activity: AppCompatActivity?,
-            bleButton: FloatingActionButton?,
-            dangerReportsViewModel: DangerReportsViewModel?,
-            startForResult: ActivityResultLauncher<Intent>?
+            activity: AppCompatActivity,
+            bleButton: FloatingActionButton,
+            dangerReportsViewModel: DangerReportsViewModel,
+            startForResult: ActivityResultLauncher<Intent>
         ): BluetoothHandler {
             if (instance == null) {
-                if (activity == null || bleButton == null || dangerReportsViewModel == null || startForResult == null) {
-                    requireNotNull(instance)
-                } else {
-                    instance = BluetoothHandler(
-                        activity,
-                        bleButton,
-                        dangerReportsViewModel,
-                        startForResult
-                    )
-                }
+                instance = BluetoothHandler(
+                    activity,
+                    bleButton,
+                    dangerReportsViewModel,
+                    startForResult
+                )
             }
             return requireNotNull(instance)
         }
@@ -83,7 +79,6 @@ internal class BluetoothHandler private constructor(
     // Permissions
 
     private val packageManager = activity.packageManager
-    private fun PackageManager.missingSystemFeature(name: String): Boolean = !hasSystemFeature(name)
     private var bluetoothManager: BluetoothManager =
         activity.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     private var bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
@@ -193,16 +188,6 @@ internal class BluetoothHandler private constructor(
                 }
             }
         }
-//        packageManager.takeIf { it.missingSystemFeature(PackageManager.FEATURE_BLUETOOTH) }
-//            .also {
-//                Toast.makeText(activity, R.string.bluetooth_not_supported, Toast.LENGTH_SHORT).show()
-//                ok = false
-//            }
-//        packageManager.takeIf { it.missingSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE) }
-//            ?.also {
-//                Toast.makeText(activity, R.string.ble_not_supported, Toast.LENGTH_SHORT).show()
-//                ok = false
-//            }
 
         return ok
     }
@@ -325,6 +310,28 @@ internal class BluetoothHandler private constructor(
 //                Log.d(TAG, DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochSecond(timestamp)))
 
                 // Add report
+                // TODO uncomment these lines (BLE => local reports)
+//                dangerReportsViewModel.addLocalReports(
+//                    listOf(
+//                        LocalReport(
+//                            timestamp = timestamp,
+//                            distance = json.getDouble("distance"),
+//                            objectSpeed = json.getDouble("distance"),
+//                            bicycleSpeed = json.getDouble("distance"),
+//                            latitude = json.getDouble("distance"),
+//                            longitude = json.getDouble("distance"),
+//                            sync = false
+//                        )
+//                    )
+//                )
+
+                // Used to test and see the points on the map
+
+                var lastIndex = dangerReportsViewModel.getFeatures().value?.features()?.lastIndex
+                if (lastIndex == null) {
+                    lastIndex = 0
+                }
+
                 dangerReportsViewModel.addLocalReports(
                     listOf(
                         LocalReport(
@@ -332,42 +339,14 @@ internal class BluetoothHandler private constructor(
                             distance = json.getDouble("distance"),
                             objectSpeed = json.getDouble("distance"),
                             bicycleSpeed = json.getDouble("distance"),
-                            latitude = json.getDouble("distance"),
-                            longitude = json.getDouble("distance"),
+                            latitude = 43.6020 + (lastIndex).toDouble() * 0.01,
+                            longitude = 1.4530 + (lastIndex).toDouble() * 0.01,
                             sync = false
                         )
                     )
                 )
 
             }
-        }
-    }
-
-    suspend fun write(report: LocalReport): Boolean {
-        return if (connected) {
-//            val testReport = LocalReport(
-//                timestamp = 193699,
-//                distance = 10.0,
-//                objectSpeed = 20.0,
-//                bicycleSpeed = 1.0,
-//                latitude = 25.0,
-//                longitude = 45.0,
-//                sync = false
-//            )
-//            val json = testReport.toJSON()
-            val json = report.toJSON()
-            json.put("date", "4/12/2021")
-            val jsonString = json.toString().replace("\\", "")
-            Log.d(TAG, jsonString)
-            connectedDevice?.writeCharacteristic(
-                CUSTOM_SERVICE_UUID,
-                CUSTOM_CHARACTERISTIC_UUID,
-                jsonString.toByteArray(),
-                WriteType.WITH_RESPONSE
-            )
-            true
-        } else {
-            false
         }
     }
 

@@ -72,7 +72,7 @@ class DangerReportBottomSheetDialog(
             }
             var subtitleText = buildText("bicycle_speed", "Bicycle speed", "km/h")
             subtitleText += buildText("object_speed", "Object speed", "km/h")
-            subtitleText += buildText("distance", "Distance", "m")
+            subtitleText += buildText("distance", "Distance", "cm")
             subtitle?.text = subtitleText
             p.get("sync")?.asBoolean?.let {
                 if (!it) {

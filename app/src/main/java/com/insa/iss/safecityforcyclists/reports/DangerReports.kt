@@ -59,8 +59,17 @@ class DangerReports(
         unclustered.setProperties(
             iconImage(LOCAL_MARKER_ICON),
             iconSize(
-                Expression.division(
-                    Expression.get("object_speed"), Expression.literal(4.0f)
+                // Min to avoid mini markers
+                Expression.sum(
+                    Expression.literal(viewModel.iconMinSize),
+                    Expression.division(
+//                    Expression.get("object_speed"), Expression.literal(4.0f)
+                        Expression.get("object_speed"),
+                        Expression.literal(
+                            viewModel.getDangerClassification().value?.minSpeed
+                                ?: DangerClassification.defaultMinSpeed
+                        )
+                    )
                 )
             )
         )
@@ -74,8 +83,17 @@ class DangerReports(
         unclustered.setProperties(
             iconImage(LOCAL_MARKER_UNSYNC_ICON),
             iconSize(
-                Expression.division(
-                    Expression.get("object_speed"), Expression.literal(4.0f)
+                // Min to avoid mini markers
+                Expression.sum(
+                    Expression.literal(viewModel.iconMinSize),
+                    Expression.division(
+//                    Expression.get("object_speed"), Expression.literal(4.0f)
+                        Expression.get("object_speed"),
+                        Expression.literal(
+                            viewModel.getDangerClassification().value?.minSpeed
+                                ?: DangerClassification.defaultMinSpeed
+                        )
+                    )
                 )
             )
         )

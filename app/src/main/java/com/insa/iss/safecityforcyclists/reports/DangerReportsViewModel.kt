@@ -6,6 +6,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
 import com.insa.iss.safecityforcyclists.database.LocalReportDatabase
 import com.mapbox.geojson.Feature
@@ -21,6 +24,12 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
     private val dangerClassification = MutableLiveData<DangerClassification?>()
     private var db: LocalReportDatabase? = null
 
+    val iconMinSize = 0.5
+
+    // TODO remove earthquakes and this variable
+    private val useDangerReportsRemoteServer =
+        getApplication<Application>().resources.getBoolean(R.bool.useDangerReportsRemoteServer)
+
     init {
         db = Room.databaseBuilder(
             getApplication(),
@@ -28,42 +37,63 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
         ).build()
     }
 
-    fun getFeatures():  LiveData<FeatureCollection?> {
+    fun getFeatures(): LiveData<FeatureCollection?> {
         return features
+    }
+
+    fun getDangerClassification(): LiveData<DangerClassification?> {
+        return dangerClassification
+    }
+
+    fun getLocalFeaturesAsJson(pretty: Boolean = false): String {
+        val gson: Gson = if (pretty) {
+            GsonBuilder().setPrettyPrinting().create()
+        } else {
+            Gson()
+        }
+        return gson.toJson(features.value)
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun makeClassificationRequest(): DangerClassification {
         return withContext(Dispatchers.IO) {
-            // TODO set URL
-            return@withContext DangerClassification(JSONObject(URL("").readText()))
+            val url: String =
+                getApplication<Application>().resources.getString(R.string.server_uri) + "criteria"
+            return@withContext DangerClassification(JSONObject(URL(url).readText()))
         }
     }
 
     fun initData() {
         viewModelScope.launch {
+            // TODO use danger classification
             // Danger classification
-//            dangerClassification.value = makeClassificationRequest()
+            if (useDangerReportsRemoteServer) {
+                dangerClassification.value = makeClassificationRequest()
+            } else {
+                dangerClassification.value = DangerClassification(JSONObject())
+            }
 
             // Local Data
-            val localReports = getReports()
+            val localReports = getUnsyncedReports()
             val featureList = ArrayList<Feature>()
             if (localReports != null) {
                 for (report in localReports) {
-                    val f = Feature.fromJson("{ " +
-                            "\"type\": \"Feature\", " +
-                            "\"properties\": { " +
-                            "\"id\": ${report.id}, " +
-                            "\"bicycle_speed\": ${report.bicycleSpeed}, " +
-                            "\"object_speed\": ${report.objectSpeed}, " +
-                            "\"distance\": ${report.distance}, " +
-                            "\"sync\": ${report.sync}, " +
-                            "\"timestamp\": ${report.timestamp} " +
-                            "}, " +
-                            "\"geometry\": { " +
-                            "\"type\": \"Point\", " +
-                            "\"coordinates\": [ ${report.longitude}, ${report.latitude}, 0.0 ] " +
-                            "} }")
+                    val f = Feature.fromJson(
+                        "{ " +
+                                "\"type\": \"Feature\", " +
+                                "\"properties\": { " +
+                                "\"id\": ${report.id}, " +
+                                "\"bicycle_speed\": ${report.bicycleSpeed}, " +
+                                "\"object_speed\": ${report.objectSpeed}, " +
+                                "\"distance\": ${report.distance}, " +
+                                "\"sync\": ${report.sync}, " +
+                                "\"timestamp\": ${report.timestamp} " +
+                                "}, " +
+                                "\"geometry\": { " +
+                                "\"type\": \"Point\", " +
+                                "\"coordinates\": [ ${report.longitude}, ${report.latitude}, 0.0 ] " +
+                                "} }"
+                    )
                     featureList.add(f)
                 }
             }
@@ -71,9 +101,15 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    private suspend fun getReports(): List<LocalReport>? {
+//    private suspend fun getReports(): List<LocalReport>? {
+//        return withContext(Dispatchers.IO) {
+//            return@withContext db?.localReportDao()?.getReports()
+//        }
+//    }
+
+    private suspend fun getUnsyncedReports(): List<LocalReport>? {
         return withContext(Dispatchers.IO) {
-            return@withContext db?.localReportDao()?.getReports()
+            return@withContext db?.localReportDao()?.getUnsyncedReports()
         }
     }
 
@@ -95,7 +131,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    fun syncLocalReportsById(ids: List<Int>){
+    fun syncLocalReportsById(ids: List<Int>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 db?.localReportDao()?.syncReportsById(ids)!!
@@ -104,7 +140,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    fun unsyncLocalReportsById(ids: List<Int>){
+    fun unsyncLocalReportsById(ids: List<Int>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 db?.localReportDao()?.unsyncReportsById(ids)!!

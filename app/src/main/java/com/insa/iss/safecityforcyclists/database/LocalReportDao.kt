@@ -9,6 +9,9 @@ interface LocalReportDao {
     @Query("SELECT * FROM local_reports")
     fun getReports(): List<LocalReport>
 
+    @Query("SELECT * FROM local_reports WHERE sync = 0")
+    fun getUnsyncedReports(): List<LocalReport>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertReports(reports: List<LocalReport>)
 
