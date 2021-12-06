@@ -17,8 +17,7 @@ import org.json.JSONObject
 import java.net.URL
 
 class DangerReportsViewModel(application: Application) : AndroidViewModel(application) {
-    private val remoteFeatures = MutableLiveData<FeatureCollection?>()
-    private val localFeatures = MutableLiveData<FeatureCollection?>()
+    private val features = MutableLiveData<FeatureCollection?>()
     private val dangerClassification = MutableLiveData<DangerClassification?>()
     private var db: LocalReportDatabase? = null
 
@@ -29,19 +28,8 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
         ).build()
     }
 
-    fun getRemoteFeatures(): LiveData<FeatureCollection?> {
-        return remoteFeatures
-    }
-
-    fun getLocalFeatures():  LiveData<FeatureCollection?> {
-        return localFeatures
-    }
-
-    @Suppress("BlockingMethodInNonBlockingContext")
-    private suspend fun makeRequest(): FeatureCollection {
-        return withContext(Dispatchers.IO) {
-            return@withContext FeatureCollection.fromJson(URL("https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson").readText())
-        }
+    fun getFeatures():  LiveData<FeatureCollection?> {
+        return features
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -54,8 +42,6 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
 
     fun initData() {
         viewModelScope.launch {
-            // Remote Data
-            remoteFeatures.value = makeRequest()
             // Danger classification
 //            dangerClassification.value = makeClassificationRequest()
 
@@ -81,7 +67,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
                     featureList.add(f)
                 }
             }
-            localFeatures.value = FeatureCollection.fromFeatures(featureList)
+            features.value = FeatureCollection.fromFeatures(featureList)
         }
     }
 

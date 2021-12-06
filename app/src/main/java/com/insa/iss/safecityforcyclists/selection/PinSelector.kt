@@ -77,6 +77,7 @@ class PinSelector(
                 MapFragment.LOCAL_REPORTS_ID,
                 MapFragment.LOCAL_REPORTS_UNSYNC_ID
             )
+        println(remoteReportsFeatures)
         if (remoteReportsFeatures.isNotEmpty()) {
             val feature: Feature = remoteReportsFeatures[0]
             showReportModal(feature)

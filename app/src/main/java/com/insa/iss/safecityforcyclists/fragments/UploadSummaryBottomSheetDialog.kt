@@ -55,7 +55,7 @@ class UploadSummaryBottomSheetDialog(private val onItemPressedCallback: (bottomS
     }
 
     private fun updateDataset() {
-        viewModel.getLocalFeatures().value?.features()?.let {
+        viewModel.getFeatures().value?.features()?.let {
             uploadListAdapter.dataSet = it.filter { feature ->
                 feature.properties()?.get("sync")?.asBoolean == false
             }
@@ -78,7 +78,7 @@ class UploadSummaryBottomSheetDialog(private val onItemPressedCallback: (bottomS
             onItemPressedCallback(this, item, position)
         }
 
-        viewModel.getLocalFeatures().observe(viewLifecycleOwner, {
+        viewModel.getFeatures().observe(viewLifecycleOwner, {
             updateDataset()
         })
         uploadRecyclerView.layoutManager = LinearLayoutManager(requireActivity())

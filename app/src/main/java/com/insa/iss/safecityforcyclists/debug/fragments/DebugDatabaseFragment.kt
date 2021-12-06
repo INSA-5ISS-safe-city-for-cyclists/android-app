@@ -29,11 +29,11 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
         quickRemoveButton = view.findViewById(R.id.quickRemoveFAB)
         deleteReportFAB = view.findViewById(R.id.deleteReportFAB)
 
-        dangerReportsViewModel.getLocalFeatures().value?.features()?.size?.let { size ->
+        dangerReportsViewModel.getFeatures().value?.features()?.size?.let { size ->
             setRemoveButtonState(size > 0)
         }
 
-        dangerReportsViewModel.getLocalFeatures().observe(viewLifecycleOwner, { featureCollection ->
+        dangerReportsViewModel.getFeatures().observe(viewLifecycleOwner, { featureCollection ->
             featureCollection?.features()?.size?.let { size ->
                 setRemoveButtonState(size > 0)
             }
@@ -41,7 +41,7 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
         // Add dummy report
         view.findViewById<FloatingActionButton>(R.id.quickAddFAB).setOnClickListener {
-            var size = dangerReportsViewModel.getLocalFeatures().value?.features()?.size
+            var size = dangerReportsViewModel.getFeatures().value?.features()?.size
             if (size == null) {
                 size = 0
             }
@@ -77,7 +77,7 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
         // Remove last report
         quickRemoveButton?.setOnClickListener {
-            dangerReportsViewModel.getLocalFeatures().value?.features()?.let { features ->
+            dangerReportsViewModel.getFeatures().value?.features()?.let { features ->
                 if (features.size > 0) {
                     features.last().properties()?.get("id")?.asInt?.let { id ->
                         dangerReportsViewModel.deleteLocalReportsById(listOf(id))
@@ -117,7 +117,7 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
     //method for read records from database in ListView
     private fun viewRecord(): String {
-        val localReports = dangerReportsViewModel.getLocalFeatures().value
+        val localReports = dangerReportsViewModel.getFeatures().value
         var result = ""
         localReports?.features()?.iterator()?.forEach { feature ->
             result += "*${feature.properties()}\n"

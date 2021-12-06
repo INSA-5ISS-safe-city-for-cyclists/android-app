@@ -5,7 +5,7 @@ import android.graphics.Color
 import com.insa.iss.safecityforcyclists.MainActivity
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.location.Location
-import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
+import com.insa.iss.safecityforcyclists.reports.DangerZonesViewModel
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.MultiLineString
@@ -38,7 +38,7 @@ class Routing(
     private val mapboxMap: MapboxMap,
     private val activity: Activity,
     private val symbolLayerId: String,
-    private val dangerReportsViewModel: DangerReportsViewModel,
+    private val dangerZonesViewModel: DangerZonesViewModel,
     private val location: Location,
     private val routeViewModel: RouteViewModel
 ) {
@@ -86,7 +86,7 @@ class Routing(
     private fun detectDangerousZones() {
         // Need to check if close to danger
 
-        val dangerFeatures = dangerReportsViewModel.getRemoteFeatures().value
+        val dangerFeatures = dangerZonesViewModel.getFeatures().value
         if (dangerFeatures != null) {
             // Create a bounding box around the path with turf-bbox and turf-bbox-polygon
             routeBounds = TurfMeasurement.bbox(routeViewModel.routeGeoJson.value)

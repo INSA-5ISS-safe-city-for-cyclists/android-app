@@ -21,6 +21,8 @@ import com.insa.iss.safecityforcyclists.bluetooth.BluetoothHandler
 import com.insa.iss.safecityforcyclists.location.Location
 import com.insa.iss.safecityforcyclists.reports.DangerReports
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
+import com.insa.iss.safecityforcyclists.reports.DangerZones
+import com.insa.iss.safecityforcyclists.reports.DangerZonesViewModel
 import com.insa.iss.safecityforcyclists.routing.RouteViewModel
 import com.insa.iss.safecityforcyclists.routing.Routing
 import com.insa.iss.safecityforcyclists.search.SearchResultsViewModel
@@ -50,11 +52,13 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     private var symbolManager: SymbolManager? = null
     private var routing: Routing? = null
     private var dangerReports: DangerReports? = null
+    private var dangerZones: DangerZones? = null
     private var location: Location? = null
     private var pinSelector: PinSelector? = null
     private val searchResultsViewModel: SearchResultsViewModel by activityViewModels()
     private val routeViewModel: RouteViewModel by activityViewModels()
     private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
+    private val dangerZonesViewModel: DangerZonesViewModel by activityViewModels()
     private var uploadFAB: FloatingActionButton? = null
 
     private lateinit var bluetoothHandler: BluetoothHandler
@@ -71,6 +75,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(requireActivity())
         dangerReportsViewModel.initData()
+        dangerZonesViewModel.initData()
 
         startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
@@ -155,6 +160,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 map.uiSettings.attributionGravity = Gravity.TOP
                 map.uiSettings.setAttributionMargins(15, 250, 0, 0)
                 map.uiSettings.setCompassMargins(0, 250, 50, 0)
+                map.setMaxZoomPreference(20.0)
 
                 addSymbolImages(style)
 
@@ -163,6 +169,8 @@ class MapFragment : Fragment(R.layout.map_fragment) {
 
                 dangerReports =
                     DangerReports(style, this, dangerReportsViewModel)
+                dangerZones =
+                    DangerZones(style, this, dangerZonesViewModel)
 
                 location = Location(style, map, requireActivity(), view.findViewById(R.id.gpsFAB))
                 location?.onResume()
@@ -173,7 +181,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                     map,
                     requireActivity(),
                     symbolManager?.layerId!!,
-                    dangerReportsViewModel,
+                    dangerZonesViewModel,
                     location!!,
                     routeViewModel
                 )
