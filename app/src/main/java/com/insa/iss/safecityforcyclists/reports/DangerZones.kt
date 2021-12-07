@@ -1,6 +1,7 @@
 package com.insa.iss.safecityforcyclists.reports
 
 import androidx.fragment.app.Fragment
+import com.insa.iss.safecityforcyclists.fragments.MapFragment.Companion.LOCAL_REPORTS_ID
 import com.insa.iss.safecityforcyclists.fragments.MapFragment.Companion.REMOTE_REPORTS_ID
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression.*
@@ -93,7 +94,7 @@ class DangerZones(
                 )
             )
         )
-        loadedMapStyle.addLayer(layer)
+        loadedMapStyle.addLayerBelow(layer, LOCAL_REPORTS_ID)
     }
 
     private fun addCircleLayer() {
