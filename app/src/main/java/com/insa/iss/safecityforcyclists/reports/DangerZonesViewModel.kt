@@ -5,9 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.room.Room
 import com.insa.iss.safecityforcyclists.R
-import com.insa.iss.safecityforcyclists.database.LocalReportDatabase
 import com.mapbox.geojson.FeatureCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,13 +20,6 @@ class DangerZonesViewModel(application: Application) : AndroidViewModel(applicat
 
     fun getFeatures(): LiveData<FeatureCollection?> {
         return features
-    }
-    private var db: LocalReportDatabase? = null
-    init {
-        db = Room.databaseBuilder(
-            getApplication(),
-            LocalReportDatabase::class.java, "safe-city-for-cyclists"
-        ).build()
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
