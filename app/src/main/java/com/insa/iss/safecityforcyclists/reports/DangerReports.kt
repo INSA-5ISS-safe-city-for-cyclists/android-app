@@ -19,6 +19,10 @@ class DangerReports(
     fragment: Fragment,
     private val viewModel: DangerReportsViewModel
 ) {
+    companion object {
+        const val ICON_SIZE = 1f
+    }
+
     init {
         loadGeoJsonSource()
         addUnclusteredLayer()
@@ -58,22 +62,17 @@ class DangerReports(
         val unclustered = SymbolLayer(LOCAL_REPORTS_ID, LOCAL_REPORTS_ID)
         unclustered.setProperties(
             iconImage(LOCAL_MARKER_ICON),
-            iconSize(
-                // Min to avoid mini markers
-                Expression.sum(
-                    Expression.literal(viewModel.iconMinSize),
-                    Expression.division(
-//                    Expression.get("object_speed"), Expression.literal(4.0f)
-                        Expression.get("object_speed"),
-                        Expression.literal(
-                            viewModel.getDangerClassification().value?.minSpeed
-                                ?: DangerClassification.defaultMinSpeed
-                        )
-                    )
-                )
-            )
+            iconSize(Expression.literal(ICON_SIZE))
         )
-        unclustered.setFilter(Expression.has("sync"))
+        unclustered.setFilter(Expression.all(
+            Expression.has("sync"),
+            Expression.eq(Expression.get("sync"), true),
+            viewModel.getDangerClassification().value?.isDangerous(
+                Expression.get("object_speed"),
+                Expression.get("bicycle_speed"),
+                Expression.get("distance")
+            )
+        ))
         loadedMapStyle.addLayer(unclustered)
     }
 
@@ -82,25 +81,17 @@ class DangerReports(
         val unclustered = SymbolLayer(LOCAL_REPORTS_UNSYNC_ID, LOCAL_REPORTS_ID)
         unclustered.setProperties(
             iconImage(LOCAL_MARKER_UNSYNC_ICON),
-            iconSize(
-                // Min to avoid mini markers
-                Expression.sum(
-                    Expression.literal(viewModel.iconMinSize),
-                    Expression.division(
-//                    Expression.get("object_speed"), Expression.literal(4.0f)
-                        Expression.get("object_speed"),
-                        Expression.literal(
-                            viewModel.getDangerClassification().value?.minSpeed
-                                ?: DangerClassification.defaultMinSpeed
-                        )
-                    )
-                )
-            )
+            iconSize(Expression.literal(ICON_SIZE))
         )
         unclustered.setFilter(
             Expression.all(
                 Expression.has("sync"),
-                Expression.eq(Expression.get("sync"), false)
+                Expression.eq(Expression.get("sync"), false),
+                viewModel.getDangerClassification().value?.isDangerous(
+                    Expression.get("object_speed"),
+                    Expression.get("bicycle_speed"),
+                    Expression.get("distance")
+                )
             )
         )
         loadedMapStyle.addLayer(unclustered)

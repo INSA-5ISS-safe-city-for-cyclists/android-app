@@ -24,8 +24,6 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
     private val dangerClassification = MutableLiveData<DangerClassification?>()
     private var db: LocalReportDatabase? = null
 
-    val iconMinSize = 0.5
-
     // TODO remove earthquakes and this variable
     private val useDangerReportsRemoteServer =
         getApplication<Application>().resources.getBoolean(R.bool.useDangerReportsRemoteServer)
