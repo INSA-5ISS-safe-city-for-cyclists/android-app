@@ -16,6 +16,11 @@ class DangerZones(
     fragment: Fragment,
     private val viewModel: DangerZonesViewModel
 ) {
+    companion object {
+        const val HEATMAP_MAX_ZOOM = 14f
+        const val HEATMAP_TRANSITION_LENGTH = 2f
+    }
+
     init {
         loadGeoJsonSource()
         addHeatmapLayer()
@@ -47,7 +52,7 @@ class DangerZones(
 
     private fun addHeatmapLayer() {
         val layer = HeatmapLayer("heatmap", REMOTE_REPORTS_ID)
-        layer.maxZoom = 9f
+        layer.maxZoom = HEATMAP_MAX_ZOOM
         layer.sourceLayer = REMOTE_REPORTS_ID
         layer.setProperties(
             // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
@@ -76,21 +81,21 @@ class DangerZones(
                 interpolate(
                     linear(), zoom(),
                     stop(0, 1),
-                    stop(9, 3)
+                    stop(HEATMAP_MAX_ZOOM, 3)
                 )
             ),  // Adjust the heatmap radius by zoom level
             heatmapRadius(
                 interpolate(
                     linear(), zoom(),
                     stop(0, 2),
-                    stop(9, 20)
+                    stop(HEATMAP_MAX_ZOOM, 20)
                 )
             ),  // Transition from heatmap to circle layer by zoom level
             heatmapOpacity(
                 interpolate(
                     linear(), zoom(),
-                    stop(7, 1),
-                    stop(9, 0)
+                    stop(HEATMAP_MAX_ZOOM - HEATMAP_TRANSITION_LENGTH, 1),
+                    stop(HEATMAP_MAX_ZOOM, 0)
                 )
             )
         )
@@ -103,16 +108,8 @@ class DangerZones(
             circleRadius(
                 interpolate(
                     exponential(2), zoom(),
-                    literal(7), interpolate(
-                        linear(), get("mag"),
-                        stop(1, 1),
-                        stop(6, 4)
-                    ),
-                    literal(20), interpolate(
-                        linear(), get("mag"),
-                        stop(1, 70),
-                        stop(6, 280)
-                    )
+                    literal(HEATMAP_MAX_ZOOM - HEATMAP_TRANSITION_LENGTH), literal(2),
+                    literal(20), literal(200)
                 )
             ),  // Color circle by earthquake magnitude
             circleColor(
@@ -129,8 +126,8 @@ class DangerZones(
             circleOpacity(
                 interpolate(
                     linear(), zoom(),
-                    stop(7, 0),
-                    stop(8, 0.7)
+                    stop(HEATMAP_MAX_ZOOM - HEATMAP_TRANSITION_LENGTH, 0),
+                    stop(HEATMAP_MAX_ZOOM - HEATMAP_TRANSITION_LENGTH / 2, 0.7)
                 )
             ),
             circleStrokeColor("white"),
