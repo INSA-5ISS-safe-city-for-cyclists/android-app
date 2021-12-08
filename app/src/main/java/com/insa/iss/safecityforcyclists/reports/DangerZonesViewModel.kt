@@ -6,10 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.insa.iss.safecityforcyclists.R
+import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.ConnectException
 import java.net.URL
 
 class DangerZonesViewModel(application: Application) : AndroidViewModel(application) {
@@ -30,7 +32,12 @@ class DangerZonesViewModel(application: Application) : AndroidViewModel(applicat
             } else {
                 "https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson"
             }
-            return@withContext FeatureCollection.fromJson(URL(url).readText())
+            try {
+                return@withContext FeatureCollection.fromJson(URL(url).readText())
+            } catch (e: ConnectException) {
+                println("Could not connect to $url")
+                return@withContext FeatureCollection.fromFeatures(ArrayList<Feature>())
+            }
         }
     }
 

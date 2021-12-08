@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.net.ConnectException
 import java.net.URL
 
 class DangerReportsViewModel(application: Application) : AndroidViewModel(application) {
@@ -57,7 +58,12 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
         return withContext(Dispatchers.IO) {
             val url: String =
                 getApplication<Application>().resources.getString(R.string.server_uri) + "criteria"
-            return@withContext DangerClassification(JSONObject(URL(url).readText()))
+            try {
+                return@withContext DangerClassification(JSONObject(URL(url).readText()))
+            } catch (e: ConnectException) {
+                println("Could not connect to $url")
+                return@withContext DangerClassification()
+            }
         }
     }
 
