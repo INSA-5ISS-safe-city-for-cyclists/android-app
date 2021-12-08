@@ -22,7 +22,7 @@ import java.net.URL
 
 class DangerReportsViewModel(application: Application) : AndroidViewModel(application) {
     private val features = MutableLiveData<FeatureCollection?>()
-    private val dangerClassification = MutableLiveData<DangerClassification?>()
+    private var dangerClassification: DangerClassification = DangerClassification()
     private var db: LocalReportDatabase? = null
 
     // TODO remove earthquakes and this variable
@@ -40,7 +40,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
         return features
     }
 
-    fun getDangerClassification(): LiveData<DangerClassification?> {
+    fun getDangerClassification(): DangerClassification {
         return dangerClassification
     }
 
@@ -69,12 +69,11 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
 
     fun initData() {
         viewModelScope.launch {
-            // TODO use danger classification
             // Danger classification
-            if (useDangerReportsRemoteServer) {
-                dangerClassification.value = makeClassificationRequest()
+            dangerClassification = if (useDangerReportsRemoteServer) {
+                makeClassificationRequest()
             } else {
-                dangerClassification.value = DangerClassification(JSONObject())
+                DangerClassification(JSONObject())
             }
 
             // Local Data
@@ -105,15 +104,10 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-//    private suspend fun getReports(): List<LocalReport>? {
-//        return withContext(Dispatchers.IO) {
-//            return@withContext db?.localReportDao()?.getReports()
-//        }
-//    }
-
     private suspend fun getUnsyncedReports(): List<LocalReport>? {
         return withContext(Dispatchers.IO) {
-            return@withContext db?.localReportDao()?.getUnsyncedReports()
+            return@withContext db?.localReportDao()?.getUnsyncedReports(
+                dangerClassification.maxDistance, dangerClassification.minSpeed)
         }
     }
 

@@ -9,8 +9,8 @@ interface LocalReportDao {
     @Query("SELECT * FROM local_reports")
     fun getReports(): List<LocalReport>
 
-    @Query("SELECT * FROM local_reports WHERE sync = 0")
-    fun getUnsyncedReports(): List<LocalReport>
+    @Query("SELECT * FROM local_reports WHERE sync = 0 AND (distance < :maxDistance OR (object_speed - bicycle_speed) > :minSpeed)")
+    fun getUnsyncedReports(maxDistance: Double, minSpeed: Double): List<LocalReport>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertReports(reports: List<LocalReport>)

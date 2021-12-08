@@ -66,12 +66,7 @@ class DangerReports(
         )
         unclustered.setFilter(Expression.all(
             Expression.has("sync"),
-            Expression.eq(Expression.get("sync"), true),
-            viewModel.getDangerClassification().value?.isDangerous(
-                Expression.get("object_speed"),
-                Expression.get("bicycle_speed"),
-                Expression.get("distance")
-            )
+            Expression.eq(Expression.get("sync"), true)
         ))
         loadedMapStyle.addLayer(unclustered)
     }
@@ -86,12 +81,7 @@ class DangerReports(
         unclustered.setFilter(
             Expression.all(
                 Expression.has("sync"),
-                Expression.eq(Expression.get("sync"), false),
-                viewModel.getDangerClassification().value?.isDangerous(
-                    Expression.get("object_speed"),
-                    Expression.get("bicycle_speed"),
-                    Expression.get("distance")
-                )
+                Expression.eq(Expression.get("sync"), false)
             )
         )
         loadedMapStyle.addLayer(unclustered)

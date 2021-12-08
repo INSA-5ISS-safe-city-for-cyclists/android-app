@@ -1,6 +1,5 @@
 package com.insa.iss.safecityforcyclists.reports
 
-import com.mapbox.mapboxsdk.style.expressions.Expression
 import org.json.JSONException
 import org.json.JSONObject
 import org.json.JSONObject.NULL
@@ -11,8 +10,10 @@ class DangerClassification(jsonObject: JSONObject?) {
         const val defaultMinSpeed = 30.0
     }
 
-    private var maxDistance: Double = defaultMaxDistance
-    private var minSpeed: Double = defaultMinSpeed
+    var maxDistance: Double = defaultMaxDistance
+        private set
+    var minSpeed: Double = defaultMinSpeed
+        private set
 
     init {
         try {
@@ -21,6 +22,7 @@ class DangerClassification(jsonObject: JSONObject?) {
                     println("Found max distance: $it")
                     it
                 } else {
+                    println("Using default max distance: $defaultMaxDistance")
                     defaultMaxDistance
                 }
             }
@@ -29,6 +31,7 @@ class DangerClassification(jsonObject: JSONObject?) {
                     println("Found min speed: $it")
                     it
                 } else {
+                    println("Using default min speed: $defaultMinSpeed")
                     defaultMinSpeed
                 }
             }
@@ -38,11 +41,4 @@ class DangerClassification(jsonObject: JSONObject?) {
     }
 
     constructor() : this(null)
-
-    fun isDangerous(object_speed: Expression, bicycle_speed: Expression, distance: Expression): Expression {
-        return Expression.any(
-            Expression.gt(Expression.literal(maxDistance), distance),
-            Expression.gt(Expression.subtract(object_speed, bicycle_speed), Expression.literal(minSpeed))
-        )
-    }
 }
