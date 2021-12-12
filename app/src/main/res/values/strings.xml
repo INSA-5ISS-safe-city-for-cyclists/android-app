@@ -17,4 +17,5 @@
     <string name="ble_device_disconnected">Appareil déconnecté</string>
     <string name="uploading_reports">Rapports en cours de téléversement</string>
     <string name="error_uploading_reports">Erreur lors du téléversement: %1$s</string>
+    <string name="error_creating_report">Erreur lors de la création du rapport (localisation manquante)</string>
 </resources>

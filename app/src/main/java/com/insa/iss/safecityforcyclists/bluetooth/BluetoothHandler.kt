@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
+import com.insa.iss.safecityforcyclists.location.Location
 import java.lang.Exception
 
 
@@ -30,12 +31,13 @@ internal class BluetoothHandler private constructor(
     private val activity: AppCompatActivity,
     private val bleButton: FloatingActionButton,
     private val dangerReportsViewModel: DangerReportsViewModel,
-    private val startForResult: ActivityResultLauncher<Intent>
+    private val startForResult: ActivityResultLauncher<Intent>,
+    private val location: Location
 ) {
 
     companion object {
 
-        private val TAG = "BLE"
+        private const val TAG = "BLE"
         private var instance: BluetoothHandler? = null
 
         // UUIDs for the Device Information service (DIS)
@@ -62,14 +64,16 @@ internal class BluetoothHandler private constructor(
             activity: AppCompatActivity,
             bleButton: FloatingActionButton,
             dangerReportsViewModel: DangerReportsViewModel,
-            startForResult: ActivityResultLauncher<Intent>
+            startForResult: ActivityResultLauncher<Intent>,
+            location: Location
         ): BluetoothHandler {
             if (instance == null) {
                 instance = BluetoothHandler(
                     activity,
                     bleButton,
                     dangerReportsViewModel,
-                    startForResult
+                    startForResult,
+                    location
                 )
             }
             return requireNotNull(instance)
@@ -285,13 +289,13 @@ internal class BluetoothHandler private constructor(
     }
 
     private suspend fun setupSensorValueNotifications(peripheral: BluetoothPeripheral) {
-        peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)?.let {
+        peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)?.let { it ->
             peripheral.observe(it) { value ->
                 val parser = BluetoothBytesParser(value, ByteOrder.LITTLE_ENDIAN)
                 val sensorValue = parser.getStringValue(0)
-                Log.d(TAG, value.fold("", { acc, byte ->
-                    byte.toString() + acc
-                }))
+//                Log.d(TAG, value.fold("", { acc, byte ->
+//                    byte.toString() + acc
+//                }))
                 Log.d(TAG, sensorValue)
 
                 // Parse JSON
@@ -310,42 +314,63 @@ internal class BluetoothHandler private constructor(
 //                Log.d(TAG, DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochSecond(timestamp)))
 
                 // Add report
-                // TODO uncomment these lines (BLE => local reports)
-//                dangerReportsViewModel.addLocalReports(
-//                    listOf(
-//                        LocalReport(
-//                            timestamp = timestamp,
-//                            distance = json.getDouble("distance"),
-//                            objectSpeed = json.getDouble("distance"),
-//                            bicycleSpeed = json.getDouble("distance"),
-//                            latitude = json.getDouble("distance"),
-//                            longitude = json.getDouble("distance"),
-//                            sync = false
-//                        )
-//                    )
-//                )
+                val report: LocalReport
 
-                // Used to test and see the points on the map
+                if (location.lastLocation != null) {
+                    report = LocalReport(
+                        timestamp = timestamp,
+                        distance = json.getDouble("distance"),
+                        objectSpeed = json.getDouble("object_speed"),
+                        bicycleSpeed = location.lastLocation!!.speed.toDouble(),
+                        latitude = location.lastLocation!!.latitude,
+                        longitude = location.lastLocation!!.longitude,
+                        sync = false
+                    )
+                    dangerReportsViewModel.addLocalReports(
+                        listOf(report)
+                    )
+                } else {
+                    // TODO remove these lines (BLE => local reports)
+                    // Used to test and see the points on the map
 
-                var lastIndex = dangerReportsViewModel.getFeatures().value?.features()?.lastIndex
-                if (lastIndex == null) {
-                    lastIndex = 0
+                    var lastIndex = dangerReportsViewModel.getFeatures().value?.features()?.lastIndex
+                    if (lastIndex == null) {
+                        lastIndex = 0
+                    }
+
+                    report = LocalReport(
+                        timestamp = timestamp,
+                        distance = json.getDouble("distance"),
+                        objectSpeed = json.getDouble("object_speed"),
+                        bicycleSpeed = 5.0 + lastIndex.toDouble(),
+                        latitude = 43.602 + lastIndex.toDouble() * 0.01,
+                        longitude = 1.453 + lastIndex.toDouble() * 0.01,
+                        sync = false
+                    )
+                    activity.runOnUiThread {
+                        Toast.makeText(activity, R.string.error_creating_report, Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
 
-                dangerReportsViewModel.addLocalReports(
-                    listOf(
-                        LocalReport(
-                            timestamp = timestamp,
-                            distance = json.getDouble("distance"),
-                            objectSpeed = json.getDouble("distance"),
-                            bicycleSpeed = json.getDouble("distance"),
-                            latitude = 43.6020 + (lastIndex).toDouble() * 0.01,
-                            longitude = 1.4530 + (lastIndex).toDouble() * 0.01,
-                            sync = false
-                        )
-                    )
-                )
+                val danger = dangerReportsViewModel.getDangerClassification()
 
+                val responseCode = danger.getDangerCode(report)
+
+                // Write characteristic (to activate the buzzer, etc)
+                peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)
+                    ?.let { it2 ->
+                        // Verify it has the write with response property
+                        if (it2.supportsWritingWithResponse()) {
+                            scope.launch(Dispatchers.IO) {
+                                peripheral.writeCharacteristic(
+                                    it2,
+                                    responseCode.toByteArray(),
+                                    WriteType.WITH_RESPONSE
+                                )
+                            }
+                        }
+                    }
             }
         }
     }

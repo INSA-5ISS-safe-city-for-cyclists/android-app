@@ -18,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.ConnectException
 import java.net.URL
 
 class DangerReportsViewModel(application: Application) : AndroidViewModel(application) {
@@ -60,7 +59,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
             val url = Constants.API_CRITERIA_ENDPOINT
             try {
                 return@withContext DangerClassification(JSONObject(URL(url).readText()))
-            } catch (e: ConnectException) {
+            } catch (e: Exception) {
                 println("Could not connect to $url")
                 return@withContext DangerClassification()
             }
@@ -114,7 +113,8 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
     fun addLocalReports(reports: List<LocalReport>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                db?.localReportDao()?.insertReports(reports)!!
+                println(reports)
+                db?.localReportDao()?.insertReports(reports)
                 return@withContext initData()
             }
         }
@@ -123,7 +123,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
     fun deleteLocalReportsById(ids: List<Int>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                db?.localReportDao()?.deleteReportsById(ids)!!
+                db?.localReportDao()?.deleteReportsById(ids)
                 return@withContext initData()
             }
         }
@@ -132,7 +132,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
     fun syncLocalReportsById(ids: List<Int>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                db?.localReportDao()?.syncReportsById(ids)!!
+                db?.localReportDao()?.syncReportsById(ids)
                 return@withContext initData()
             }
         }
@@ -141,7 +141,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
     fun unsyncLocalReportsById(ids: List<Int>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                db?.localReportDao()?.unsyncReportsById(ids)!!
+                db?.localReportDao()?.unsyncReportsById(ids)
                 return@withContext initData()
             }
         }

@@ -12,7 +12,6 @@ import com.mapbox.geojson.FeatureCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.ConnectException
 import java.net.URL
 
 class DangerZonesViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,6 +24,7 @@ class DangerZonesViewModel(application: Application) : AndroidViewModel(applicat
         return features
     }
 
+    // TODO handle remote server unavailable
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun makeRequest(): FeatureCollection {
         return withContext(Dispatchers.IO) {
@@ -35,7 +35,7 @@ class DangerZonesViewModel(application: Application) : AndroidViewModel(applicat
             }
             try {
                 return@withContext FeatureCollection.fromJson(URL(url).readText())
-            } catch (e: ConnectException) {
+            } catch (e: Exception) {
                 println("Could not connect to $url")
                 return@withContext FeatureCollection.fromFeatures(ArrayList<Feature>())
             }

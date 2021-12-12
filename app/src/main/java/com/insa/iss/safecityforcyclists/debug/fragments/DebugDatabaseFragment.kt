@@ -46,7 +46,7 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
                 listOf(
                     LocalReport(
                         // TODO à voir => secondes plutôt que millisecondes
-                        timestamp = Date().time,
+                        timestamp = Date().time / 1000,
                         distance = ((size + 2)*10).toDouble(), // cm
                         objectSpeed = (size + 3).toDouble(), // km/h
                         bicycleSpeed =(size + 4).toDouble(), // km/h

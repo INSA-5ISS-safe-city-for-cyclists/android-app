@@ -107,13 +107,6 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState) // Get the MapBox context
 
-        bluetoothHandler = BluetoothHandler.getInstance(
-            requireActivity() as AppCompatActivity,
-            view.findViewById(R.id.bleFAB),
-            dangerReportsViewModel,
-            startForResult
-        )
-
         setupMap(view, savedInstanceState)
         uploadFAB = view.findViewById(R.id.uploadFAB)
         uploadFAB?.setOnClickListener {
@@ -188,6 +181,16 @@ class MapFragment : Fragment(R.layout.map_fragment) {
 
                 pinSelector =
                     PinSelector(requireActivity(), mapView!!, map, style, routing, symbolManager)
+
+                // Setup bluetooth handler when all is good
+
+                bluetoothHandler = BluetoothHandler.getInstance(
+                    requireActivity() as AppCompatActivity,
+                    view.findViewById(R.id.bleFAB),
+                    dangerReportsViewModel,
+                    startForResult,
+                    location!!
+                )
             }
         }
         routeViewModel.routeGeoJson.observe(viewLifecycleOwner, { routeGeoJson ->

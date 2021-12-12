@@ -67,7 +67,7 @@ class DangerReportBottomSheetDialog(
         feature.properties()?.let { p ->
             p.get("timestamp")?.asLong?.let {
                 val date = Date()
-                date.time = it
+                date.time = it * 1000
                 title?.text = DateFormat.getLongDateFormat(requireContext()).format(date) + ", " + DateFormat.getTimeFormat(requireContext()).format(date)
             }
             var subtitleText = buildText("bicycle_speed", "Bicycle speed", "km/h")
