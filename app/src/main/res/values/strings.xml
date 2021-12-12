@@ -15,7 +15,6 @@
     <string name="ble_device_connected">Appareil connecté: %1$s</string>
     <string name="ble_already_connected">Appareil déjà connecté: %1$s</string>
     <string name="ble_device_disconnected">Appareil déconnecté</string>
-    <string name="server_uri">http://192.168.43.171:3000/api/</string>
     <string name="uploading_reports">Rapports en cours de téléversement</string>
     <string name="error_uploading_reports">Erreur lors du téléversement: %1$s</string>
 </resources>
