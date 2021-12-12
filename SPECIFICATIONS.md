@@ -42,10 +42,10 @@
 
 [x] Connect to the ESP in BLE
 [x] Receive object detection messages in BLE from ESP
-[] If gps active, store reports in database
-[] If gps not active, discard reports
+[X] If gps active, store reports in database
+[X] If gps not active, discard reports
 [x] Update map when updating the database
-[] Warning pop-up when connecting BLE but GPS inactive
+[x] Warning pop-up when connecting BLE but GPS inactive
 
 ## Local reports
 

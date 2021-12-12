@@ -1,6 +1,5 @@
 package com.insa.iss.safecityforcyclists.location
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
@@ -8,12 +7,10 @@ import android.content.Context
 import android.content.Context.LOCATION_SERVICE
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R

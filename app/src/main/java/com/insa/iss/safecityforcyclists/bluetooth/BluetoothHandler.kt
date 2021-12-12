@@ -22,8 +22,12 @@ import java.util.*
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
+import android.location.LocationManager
+import android.view.View
 import androidx.activity.result.ActivityResultLauncher
+import com.google.android.material.snackbar.Snackbar
 import com.insa.iss.safecityforcyclists.location.Location
+import com.mapbox.mapboxsdk.location.permissions.PermissionsManager
 import java.lang.Exception
 
 
@@ -87,6 +91,9 @@ internal class BluetoothHandler private constructor(
         activity.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     private var bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
+    private val locationManager =
+        activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
     // Blessed android coroutines
 
     @JvmField
@@ -145,8 +152,24 @@ internal class BluetoothHandler private constructor(
 
         bleButton.setOnClickListener {
             if (!connected) {
-                if (setup() && !scanning) {
-                    startScanning()
+                if (!scanning) {
+                    if (!PermissionsManager.areLocationPermissionsGranted(activity) ||
+                        !locationManager.isProviderEnabled(
+                            LocationManager.GPS_PROVIDER
+                        ) || location.lastLocation == null
+                    ) {
+                        val snackbar = Snackbar.make(
+                            bleButton.rootView,
+                            "La localisation n'est pas active, voulez-vous continuer?",
+                            Snackbar.LENGTH_LONG
+                        )
+                        snackbar.setAction("Continuer") {
+                            onContinue()
+                        }
+                        snackbar.show()
+                    } else {
+                        onContinue()
+                    }
                 } else if (scanning) {
                     stopScanning()
                     Toast.makeText(
@@ -156,6 +179,7 @@ internal class BluetoothHandler private constructor(
                     ).show()
                     bleButton.setImageDrawable(bleOffDrawable)
                 }
+
             } else {
                 Toast.makeText(
                     activity,
@@ -166,6 +190,12 @@ internal class BluetoothHandler private constructor(
                     Toast.LENGTH_SHORT
                 ).show()
             }
+        }
+    }
+
+    private fun onContinue() {
+        if (setup()) {
+            startScanning()
         }
     }
 
@@ -333,7 +363,8 @@ internal class BluetoothHandler private constructor(
                     // TODO remove these lines (BLE => local reports)
                     // Used to test and see the points on the map
 
-                    var lastIndex = dangerReportsViewModel.getFeatures().value?.features()?.lastIndex
+                    var lastIndex =
+                        dangerReportsViewModel.getFeatures().value?.features()?.lastIndex
                     if (lastIndex == null) {
                         lastIndex = 0
                     }
