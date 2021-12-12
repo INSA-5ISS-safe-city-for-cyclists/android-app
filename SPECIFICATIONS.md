@@ -40,23 +40,22 @@
 
 ## ESP connection
 
-[] Connect to the ESP in BLE
-[] Receive object detection messages in BLE from ESP
+[x] Connect to the ESP in BLE
+[x] Receive object detection messages in BLE from ESP
 [] If gps active, store reports in database
 [] If gps not active, discard reports
-[] Update map when updating the database
+[x] Update map when updating the database
 [] Warning pop-up when connecting BLE but GPS inactive
 
 ## Local reports
 
-[] Fetch classification criteria from server on start
-[] Use fetched classification to display relevant reports on the map
+[x] Fetch classification criteria from server on start
+[x] Use fetched classification to display relevant reports on the map
 [x] Show local reports in a different color from others
 [x] Show button to upload reports
 [x] Show recap modal with the list of reports to upload
 [x] Clicking on a report in the list will lower the modal and select the report on the map
 [x] Allow removing selected local report
-[] Remove uploaded reports database
-[] Remove non-dangerous reports (2 weeks) on start
+[] Remove old non-dangerous or uploaded reports (2 weeks) on start
 
 
