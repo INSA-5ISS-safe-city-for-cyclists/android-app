@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.insa.iss.safecityforcyclists.Constants
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
 import com.insa.iss.safecityforcyclists.database.LocalReportDatabase
@@ -56,8 +57,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun makeClassificationRequest(): DangerClassification {
         return withContext(Dispatchers.IO) {
-            val url: String =
-                getApplication<Application>().resources.getString(R.string.server_uri) + "criteria"
+            val url = Constants.API_CRITERIA_ENDPOINT
             try {
                 return@withContext DangerClassification(JSONObject(URL(url).readText()))
             } catch (e: ConnectException) {

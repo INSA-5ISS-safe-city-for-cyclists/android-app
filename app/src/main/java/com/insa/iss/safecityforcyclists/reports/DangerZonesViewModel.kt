@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.insa.iss.safecityforcyclists.Constants
 import com.insa.iss.safecityforcyclists.R
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -28,7 +29,7 @@ class DangerZonesViewModel(application: Application) : AndroidViewModel(applicat
     private suspend fun makeRequest(): FeatureCollection {
         return withContext(Dispatchers.IO) {
             val url = if (useDangerReportsRemoteServer) {
-                getApplication<Application>().resources.getString(R.string.server_uri) + "reports/geojson?dangerous=true"
+                Constants.API_ZONES_ENDPOINT
             } else {
                 "https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson"
             }

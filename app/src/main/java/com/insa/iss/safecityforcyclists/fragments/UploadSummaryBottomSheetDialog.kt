@@ -1,6 +1,5 @@
 package com.insa.iss.safecityforcyclists.fragments
 
-import android.app.Application
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
@@ -13,14 +12,12 @@ import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.RetryPolicy
-import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.insa.iss.safecityforcyclists.Constants
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 import com.insa.iss.safecityforcyclists.reports.DangerZonesViewModel
@@ -108,9 +105,7 @@ class UploadSummaryBottomSheetDialog(private val onItemPressedCallback: (bottomS
         val queue = Volley.newRequestQueue(requireActivity().applicationContext)
 
         // HTTP POST
-
-        val urlPost: String =
-            requireActivity().resources.getString(R.string.server_uri) + "reports/geojson"
+        val urlPost: String = Constants.API_REPORTS_ENDPOINT
 
         val requestBody = dangerReportsViewModel.getLocalFeaturesAsJson()
         Log.d("POST", requestBody)
