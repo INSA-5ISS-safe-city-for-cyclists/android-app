@@ -8,6 +8,7 @@ import com.insa.iss.safecityforcyclists.fragments.MapFragment.Companion.LOCAL_RE
 import com.insa.iss.safecityforcyclists.fragments.MapFragment.Companion.LOCAL_REPORTS_UNSYNC_ID
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.expressions.Expression.*
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
@@ -45,8 +46,8 @@ class DangerReports(
                         features,
                         GeoJsonOptions()
                             .withCluster(true)
-                            .withClusterMaxZoom(14)
-                            .withClusterRadius(50)
+                            .withClusterMaxZoom(18)
+                            .withClusterRadius(30)
                     )
                 )
                 println("Added initial geojson with $features")
@@ -57,17 +58,34 @@ class DangerReports(
         }
     }
 
+    private fun getIconSize(): Expression {
+        // Make the icon size increase with zoom level
+        return interpolate(
+            exponential(2), zoom(),
+            literal(10), literal(0.5f),
+            literal(20), literal(1f)
+        )
+    }
+
+    private fun getIconOffset(): Array<Float> {
+        // Icon is 41px tall, so move it 20px for the pin to be on the base
+        return arrayOf(0f, -20f)
+    }
+
     private fun addUnclusteredLayer() {
         //Creating a marker layer for single data points
         val unclustered = SymbolLayer(LOCAL_REPORTS_ID, LOCAL_REPORTS_ID)
         unclustered.setProperties(
             iconImage(LOCAL_MARKER_ICON),
-            iconSize(Expression.literal(ICON_SIZE))
+            iconSize(getIconSize()),
+            iconOffset(getIconOffset())
         )
-        unclustered.setFilter(Expression.all(
-            Expression.has("sync"),
-            Expression.eq(Expression.get("sync"), true)
-        ))
+        unclustered.setFilter(
+            all(
+                has("sync"),
+                eq(get("sync"), true)
+            )
+        )
         loadedMapStyle.addLayer(unclustered)
     }
 
@@ -76,12 +94,13 @@ class DangerReports(
         val unclustered = SymbolLayer(LOCAL_REPORTS_UNSYNC_ID, LOCAL_REPORTS_ID)
         unclustered.setProperties(
             iconImage(LOCAL_MARKER_UNSYNC_ICON),
-            iconSize(Expression.literal(ICON_SIZE))
+            iconSize(getIconSize()),
+            iconOffset(getIconOffset())
         )
         unclustered.setFilter(
-            Expression.all(
-                Expression.has("sync"),
-                Expression.eq(Expression.get("sync"), false)
+            all(
+                has("sync"),
+                eq(get("sync"), false)
             )
         )
         loadedMapStyle.addLayer(unclustered)
@@ -91,9 +110,9 @@ class DangerReports(
         // Use the earthquakes GeoJSON source to create three layers: One layer for each cluster category.
         // Each point range gets a different fill color.
         val layers = arrayOf(
-            intArrayOf(150, 30, Color.parseColor("#51bbd6")),
-            intArrayOf(20, 25, Color.parseColor("#f1f075")),
-            intArrayOf(0, 20, Color.parseColor("#f28cb1"))
+            intArrayOf(150, 30, Color.parseColor("#cc2617")),
+            intArrayOf(20, 25, Color.parseColor("#e56930")),
+            intArrayOf(0, 20, Color.parseColor("#e5bd47"))
         )
         for (i in layers.indices) {
             //Add clusters' circles
@@ -102,17 +121,17 @@ class DangerReports(
                 circleColor(layers[i][2]),
                 circleRadius(layers[i][1].toFloat())
             )
-            val pointCount: Expression = Expression.toNumber(Expression.get("point_count"))
+            val pointCount: Expression = toNumber(get("point_count"))
 
             // Add a filter to the cluster layer that hides the circles based on "point_count"
             circles.setFilter(
-                if (i == 0) Expression.all(
-                    Expression.has("point_count"),
-                    Expression.gte(pointCount, Expression.literal(layers[i][0]))
-                ) else Expression.all(
-                    Expression.has("point_count"),
-                    Expression.gte(pointCount, Expression.literal(layers[i][0])),
-                    Expression.lt(pointCount, Expression.literal(layers[i - 1][0]))
+                if (i == 0) all(
+                    has("point_count"),
+                    gte(pointCount, literal(layers[i][0]))
+                ) else all(
+                    has("point_count"),
+                    gte(pointCount, literal(layers[i][0])),
+                    lt(pointCount, literal(layers[i - 1][0]))
                 )
             )
             loadedMapStyle.addLayer(circles)
@@ -121,7 +140,7 @@ class DangerReports(
         //Add the count labels
         val count = SymbolLayer("reports_count", LOCAL_REPORTS_ID)
         count.setProperties(
-            textField(Expression.toString(Expression.get("point_count"))),
+            textField(toString(get("point_count"))),
             textSize(12f),
             textColor(Color.WHITE),
             textIgnorePlacement(true),
