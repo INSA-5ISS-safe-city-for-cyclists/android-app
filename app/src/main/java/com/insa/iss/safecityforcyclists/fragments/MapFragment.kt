@@ -10,14 +10,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.add
-import androidx.fragment.app.commit
+import androidx.fragment.app.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.MainActivity
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.bluetooth.BluetoothHandler
+import com.insa.iss.safecityforcyclists.debug.fragments.DebugDatabaseFragment
 import com.insa.iss.safecityforcyclists.location.Location
 import com.insa.iss.safecityforcyclists.reports.DangerReports
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
@@ -60,6 +58,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
     private val dangerZonesViewModel: DangerZonesViewModel by activityViewModels()
     private var uploadFAB: FloatingActionButton? = null
+    private var debugDatabaseFragment: DebugDatabaseFragment? = null
 
     private lateinit var bluetoothHandler: BluetoothHandler
     private lateinit var startForResult: ActivityResultLauncher<Intent>
@@ -107,17 +106,18 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState) // Get the MapBox context
 
+        // Debug database
+        if (resources.getBoolean(R.bool.debug)) {
+            val databaseDebugView: FragmentContainerView =
+                view.findViewById(R.id.database_debug_fragment)
+            databaseDebugView.visibility = View.VISIBLE
+            debugDatabaseFragment = databaseDebugView.getFragment()
+        }
+
         setupMap(view, savedInstanceState)
         uploadFAB = view.findViewById(R.id.uploadFAB)
         uploadFAB?.setOnClickListener {
            openUploadModal()
-        }
-
-        // Debug database
-        if (resources.getBoolean(R.bool.debug)) {
-            val databaseDebugView: View =
-                view.findViewById(R.id.database_debug_fragment)
-            databaseDebugView.visibility = View.VISIBLE
         }
 
         searchResultsViewModel.selected.observe(viewLifecycleOwner, { selected ->
@@ -191,6 +191,10 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                     startForResult,
                     location!!
                 )
+
+                debugDatabaseFragment?.let {
+                    it.mapboxMap = map
+                }
             }
         }
         routeViewModel.routeGeoJson.observe(viewLifecycleOwner, { routeGeoJson ->

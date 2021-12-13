@@ -9,6 +9,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import java.util.*
 
 class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
@@ -16,6 +17,8 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
     private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
     private var quickRemoveButton: FloatingActionButton? = null
     private var deleteReportFAB: FloatingActionButton? = null
+
+    public var mapboxMap: MapboxMap? = null
 
     private fun setRemoveButtonState(enabled: Boolean) {
         quickRemoveButton?.isEnabled = enabled
@@ -36,26 +39,24 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
             }
         })
 
-        // Add dummy report
+        // Add dummy report in the center of the screen
         view.findViewById<FloatingActionButton>(R.id.quickAddFAB).setOnClickListener {
-            var size = dangerReportsViewModel.getFeatures().value?.features()?.size
-            if (size == null) {
-                size = 0
-            }
-            dangerReportsViewModel.addLocalReports(
-                listOf(
-                    LocalReport(
-                        // TODO à voir => secondes plutôt que millisecondes
-                        timestamp = Date().time / 1000,
-                        distance = ((size + 2)*10).toDouble(), // cm
-                        objectSpeed = (size + 3).toDouble(), // km/h
-                        bicycleSpeed =(size + 4).toDouble(), // km/h
-                        latitude = 43.6020 + (size).toDouble() * 0.01,
-                        longitude = 1.4530 + (size).toDouble() * 0.01,
-                        sync = false
+            mapboxMap?.let {
+                dangerReportsViewModel.addLocalReports(
+                    listOf(
+                        LocalReport(
+                            // TODO à voir => secondes plutôt que millisecondes
+                            timestamp = Date().time / 1000,
+                            distance = 50.0, // cm
+                            objectSpeed = 50.0, // km/h
+                            bicycleSpeed = 20.0, // km/h
+                            latitude = it.cameraPosition.target.latitude,
+                            longitude = it.cameraPosition.target.longitude,
+                            sync = false
+                        )
                     )
                 )
-            )
+            }
         }
 
         // Remove last report

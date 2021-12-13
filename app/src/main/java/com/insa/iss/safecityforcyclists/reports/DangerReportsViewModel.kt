@@ -74,7 +74,6 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
             } else {
                 DangerClassification(JSONObject())
             }
-
             // Local Data
             val localReports = getUnsyncedReports()
             val featureList = ArrayList<Feature>()
@@ -113,6 +112,7 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
     fun addLocalReports(reports: List<LocalReport>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
+                println("Adding reports:")
                 println(reports)
                 db?.localReportDao()?.insertReports(reports)
                 return@withContext initData()

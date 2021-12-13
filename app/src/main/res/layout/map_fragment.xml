@@ -59,14 +59,14 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
-            <androidx.fragment.app.FragmentContainerView
-                android:visibility="gone"
-                android:id="@+id/database_debug_fragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:name="com.insa.iss.safecityforcyclists.debug.fragments.DebugDatabaseFragment" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/database_debug_fragment"
+            android:name="com.insa.iss.safecityforcyclists.debug.fragments.DebugDatabaseFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible" />
 
     </com.mapbox.mapboxsdk.maps.MapView>
 
