@@ -2231,6 +2231,30 @@
         "text-halo-width": 2,
         "text-halo-color": "rgba(255,255,255,0.8)"
       }
+    },
+    {
+      "id": "building-3d",
+      "type": "fill-extrusion",
+      "source": "default",
+      "source-layer": "building",
+      "filter": ["all", ["!has", "hide_3d"]],
+      "paint": {
+        "fill-extrusion-base": {
+          "property": "render_min_height",
+          "type": "identity"
+        },
+        "fill-extrusion-color": [
+          "case",
+          ["has", "colour"],
+          ["get", "colour"],
+          "hsl(39, 41%, 86%)"
+        ],
+        "fill-extrusion-height": {
+          "property": "render_height",
+          "type": "identity"
+        },
+        "fill-extrusion-opacity": 0.6
+      }
     }
   ],
   "id": "u2q1i0ci8"
