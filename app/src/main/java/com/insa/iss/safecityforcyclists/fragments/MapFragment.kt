@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -59,6 +60,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
     private val dangerZonesViewModel: DangerZonesViewModel by activityViewModels()
     private var uploadFAB: FloatingActionButton? = null
     private var debugDatabaseFragment: DebugDatabaseFragment? = null
+    private var toggleDebugButton: Button? = null
 
     private lateinit var bluetoothHandler: BluetoothHandler
     private lateinit var startForResult: ActivityResultLauncher<Intent>
@@ -107,11 +109,23 @@ class MapFragment : Fragment(R.layout.map_fragment) {
         super.onViewCreated(view, savedInstanceState) // Get the MapBox context
 
         // Debug database
-        if (resources.getBoolean(R.bool.debug)) {
+        val debugEnabled = resources.getBoolean(R.bool.debug)
+        if (debugEnabled) {
             val databaseDebugView: FragmentContainerView =
                 view.findViewById(R.id.database_debug_fragment)
             databaseDebugView.visibility = View.VISIBLE
             debugDatabaseFragment = databaseDebugView.getFragment()
+            debugDatabaseFragment?.debugEnabled = debugEnabled
+            toggleDebugButton = view.findViewById(R.id.debugButton)
+            toggleDebugButton?.visibility = View.VISIBLE
+            toggleDebugButton?.setOnClickListener {
+                debugDatabaseFragment?.debugEnabled = !debugDatabaseFragment!!.debugEnabled
+                toggleDebugButton?.text = if (debugDatabaseFragment?.debugEnabled == true) {
+                    resources.getText(R.string.disable_debug)
+                } else {
+                    resources.getText(R.string.enable_debug)
+                }
+            }
         }
 
         setupMap(view, savedInstanceState)

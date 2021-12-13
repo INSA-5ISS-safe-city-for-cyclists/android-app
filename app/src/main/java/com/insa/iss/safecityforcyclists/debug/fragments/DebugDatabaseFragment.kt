@@ -15,10 +15,25 @@ import java.util.*
 class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
     private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
+    private var container: View? = null
     private var quickRemoveButton: FloatingActionButton? = null
     private var deleteReportFAB: FloatingActionButton? = null
 
-    public var mapboxMap: MapboxMap? = null
+    var mapboxMap: MapboxMap? = null
+    var debugEnabled: Boolean = false
+        set(value) {
+            field = value
+            setViewVisible(value)
+        }
+
+    private fun setViewVisible(visible: Boolean) {
+        container?.visibility = if (visible) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
+    }
 
     private fun setRemoveButtonState(enabled: Boolean) {
         quickRemoveButton?.isEnabled = enabled
@@ -26,8 +41,10 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        container = view.findViewById(R.id.debugContainer)
         quickRemoveButton = view.findViewById(R.id.quickRemoveFAB)
         deleteReportFAB = view.findViewById(R.id.deleteReportFAB)
+        setViewVisible(debugEnabled)
 
         dangerReportsViewModel.getFeatures().value?.features()?.size?.let { size ->
             setRemoveButtonState(size > 0)
