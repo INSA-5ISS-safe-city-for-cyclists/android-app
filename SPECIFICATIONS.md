@@ -27,17 +27,6 @@
 [x] Use current position as start if available when choosing destination
 [x] On click show a modal to ask "route from" or "route to"
 
-## Navigation mode
-
-[] Enter navigation mode if route from gps position
-[] Follow gps direction in navigation
-[] Hide line after gps
-[] Hide search bar on navigation
-[] Show turn instructions when navigating
-[] Press back or a button to exit navigation
-[] Show confirmation when exiting navigation
-[] Dynamic rerouting when going out of the route
-
 ## ESP connection
 
 [x] Connect to the ESP in BLE
