@@ -148,7 +148,7 @@ class UploadSummaryBottomSheetDialog(private val onItemPressedCallback: (bottomS
             }
 
             override fun getBodyContentType(): String {
-                return "text/plain"
+                return "application/json"
             }
         }
         // Add the request to the RequestQueue.

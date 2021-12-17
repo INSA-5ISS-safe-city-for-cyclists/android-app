@@ -62,7 +62,6 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
                 dangerReportsViewModel.addLocalReports(
                     listOf(
                         LocalReport(
-                            // TODO à voir => secondes plutôt que millisecondes
                             timestamp = Date().time / 1000,
                             distance = 50.0, // cm
                             objectSpeed = 50.0, // km/h

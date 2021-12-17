@@ -24,7 +24,6 @@ class DangerZonesViewModel(application: Application) : AndroidViewModel(applicat
         return features
     }
 
-    // TODO handle remote server unavailable
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun makeRequest(): FeatureCollection {
         return withContext(Dispatchers.IO) {
