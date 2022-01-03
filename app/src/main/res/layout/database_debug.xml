@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_add_24"
-        app:tint="#000000" />
+        app:tint="#000000"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/quickAddFAB"
@@ -102,5 +102,16 @@
         app:layout_constraintBottom_toBottomOf="@+id/syncAllReportsFAB"
         app:layout_constraintStart_toStartOf="@+id/deleteReportFAB"
         tools:ignore="HardcodedText" />
+
+    <ToggleButton
+        android:id="@+id/toggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/syncAllReportsFAB"
+        app:layout_constraintStart_toStartOf="@+id/syncAllReportsFAB"
+        android:textOff="@string/enable_dangerous_zones"
+        android:textOn="@string/disable_dangerous_zones"
+        android:checked="true" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

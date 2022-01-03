@@ -17,6 +17,8 @@ import java.net.URL
 class DangerZonesViewModel(application: Application) : AndroidViewModel(application) {
     private val features = MutableLiveData<FeatureCollection?>()
 
+    var onlyDangerousZones = true
+
     private val useDangerReportsRemoteServer =
         getApplication<Application>().resources.getBoolean(R.bool.useDangerReportsRemoteServer)
 
@@ -28,7 +30,11 @@ class DangerZonesViewModel(application: Application) : AndroidViewModel(applicat
     private suspend fun makeRequest(): FeatureCollection {
         return withContext(Dispatchers.IO) {
             val url = if (useDangerReportsRemoteServer) {
-                Constants.API_ZONES_ENDPOINT
+                if (onlyDangerousZones) {
+                    Constants.API_ZONES_ENDPOINT + "?dangerous=true"
+                } else {
+                    Constants.API_ZONES_ENDPOINT
+                }
             } else {
                 "https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson"
             }

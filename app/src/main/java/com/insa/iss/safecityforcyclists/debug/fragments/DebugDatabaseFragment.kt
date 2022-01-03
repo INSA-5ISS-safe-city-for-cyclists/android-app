@@ -2,6 +2,7 @@ package com.insa.iss.safecityforcyclists.debug.fragments
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -9,11 +10,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
+import com.insa.iss.safecityforcyclists.reports.DangerZonesViewModel
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import java.util.*
 
 class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
+    private val dangerZonesViewModel: DangerZonesViewModel by activityViewModels()
     private val dangerReportsViewModel: DangerReportsViewModel by activityViewModels()
     private var container: View? = null
     private var quickRemoveButton: FloatingActionButton? = null
@@ -110,6 +113,14 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
 
         view.findViewById<FloatingActionButton>(R.id.unsyncAllReportsFAB).setOnClickListener {
             dangerReportsViewModel.unsyncLocalReportsById((0..500).toList())
+        }
+
+        // Show only dangerous zones button
+
+        val toggleDangerousZones: ToggleButton = view.findViewById(R.id.toggleButton)
+        toggleDangerousZones.setOnCheckedChangeListener { _, isChecked ->
+            dangerZonesViewModel.onlyDangerousZones = isChecked
+            dangerZonesViewModel.initData()
         }
 
         super.onViewCreated(view, savedInstanceState)

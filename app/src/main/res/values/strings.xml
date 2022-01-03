@@ -20,4 +20,6 @@
     <string name="error_creating_report">Erreur lors de la création du rapport (localisation manquante)</string>
     <string name="enable_debug">Enable Debug</string>
     <string name="disable_debug">Disable Debug</string>
+    <string name="enable_dangerous_zones">Only Dangerous zones</string>
+    <string name="disable_dangerous_zones">All zones</string>
 </resources>
