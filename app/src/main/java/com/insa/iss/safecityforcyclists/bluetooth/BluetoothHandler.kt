@@ -130,18 +130,7 @@ internal class BluetoothHandler private constructor(
                 Log.d(TAG, "Peripheral ${peripheral.name} has $state")
                 when (state) {
                     ConnectionState.CONNECTED -> handlePeripheral(peripheral)
-                    ConnectionState.DISCONNECTED -> scope.launch {
-                        connected = false
-                        connectedDevice = null
-                        bleButton.setImageDrawable(bleOffDrawable)
-                        activity.runOnUiThread {
-                            Toast.makeText(
-                                activity,
-                                R.string.ble_device_disconnected,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+                    ConnectionState.DISCONNECTED -> scope.launch { onDeviceDisconnected() }
                     else -> {
                     }
                 }
@@ -177,17 +166,34 @@ internal class BluetoothHandler private constructor(
                     ).show()
                     bleButton.setImageDrawable(bleOffDrawable)
                 }
-
             } else {
-                Toast.makeText(
-                    activity,
-                    activity.resources.getString(
-                        R.string.ble_already_connected,
-                        connectedDevice?.name
-                    ),
-                    Toast.LENGTH_SHORT
-                ).show()
+//                Toast.makeText(
+//                    activity,
+//                    activity.resources.getString(
+//                        R.string.ble_already_connected,
+//                        connectedDevice?.name
+//                    ),
+//                    Toast.LENGTH_SHORT
+//                ).show()
+                // Disconnection
+                scope.launch {
+                    onDeviceDisconnected()
+                    connectedDevice?.let { it1 -> central?.cancelConnection(it1) }
+                }
             }
+        }
+    }
+
+    private fun onDeviceDisconnected() {
+        connected = false
+        connectedDevice = null
+        bleButton.setImageDrawable(bleOffDrawable)
+        activity.runOnUiThread {
+            Toast.makeText(
+                activity,
+                R.string.ble_device_disconnected,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -369,7 +375,11 @@ internal class BluetoothHandler private constructor(
                             listOf(report)
                         )
                         activity.runOnUiThread {
-                            Toast.makeText(activity, R.string.error_creating_report, Toast.LENGTH_SHORT)
+                            Toast.makeText(
+                                activity,
+                                R.string.error_creating_report,
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
                         }
                     }
@@ -393,7 +403,7 @@ internal class BluetoothHandler private constructor(
                             }
                         }
                 } catch (e: Exception) {
-                    Log.w(TAG,"Received wrong messages")
+                    Log.w(TAG, "Received wrong messages")
                 }
             }
         }
