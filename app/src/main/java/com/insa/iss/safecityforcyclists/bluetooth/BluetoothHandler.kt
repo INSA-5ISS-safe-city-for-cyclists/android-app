@@ -326,71 +326,75 @@ internal class BluetoothHandler private constructor(
 //                }))
                 Log.d(TAG, sensorValue)
 
-                // Parse JSON
-                val json = JSONTokener(sensorValue).nextValue() as JSONObject
-                val timestamp = Date().time / 1000
-                // Add report
-                val report: LocalReport
+                try {
+                    // Parse JSON
+                    val json = JSONTokener(sensorValue).nextValue() as JSONObject
+                    val timestamp = Date().time / 1000
+                    // Add report
+                    val report: LocalReport
 
-                if (location.lastLocation != null) {
-                    report = LocalReport(
-                        timestamp = timestamp,
-                        distance = json.getDouble("distance"),
-                        objectSpeed = json.getDouble("object_speed"),
-                        bicycleSpeed = location.lastLocation!!.speed.toDouble(),
-                        latitude = location.lastLocation!!.latitude,
-                        longitude = location.lastLocation!!.longitude,
-                        sync = false
-                    )
-                    dangerReportsViewModel.addLocalReports(
-                        listOf(report)
-                    )
-                } else {
-                    // TODO remove these lines (BLE => local reports)
-                    // Used to test and see the points on the map
+                    if (location.lastLocation != null) {
+                        report = LocalReport(
+                            timestamp = timestamp,
+                            distance = json.getDouble("distance"),
+                            objectSpeed = json.getDouble("object_speed"),
+                            bicycleSpeed = location.lastLocation!!.speed.toDouble(),
+                            latitude = location.lastLocation!!.latitude,
+                            longitude = location.lastLocation!!.longitude,
+                            sync = false
+                        )
+                        dangerReportsViewModel.addLocalReports(
+                            listOf(report)
+                        )
+                    } else {
+                        // TODO remove these lines (BLE => local reports)
+                        // Used to test and see the points on the map
 
-                    var lastIndex =
-                        dangerReportsViewModel.getFeatures().value?.features()?.lastIndex
-                    if (lastIndex == null) {
-                        lastIndex = 0
-                    }
+                        var lastIndex =
+                            dangerReportsViewModel.getFeatures().value?.features()?.lastIndex
+                        if (lastIndex == null) {
+                            lastIndex = 0
+                        }
 
-                    report = LocalReport(
-                        timestamp = timestamp,
-                        distance = json.getDouble("distance"),
-                        objectSpeed = json.getDouble("object_speed"),
-                        bicycleSpeed = 5.0 + lastIndex.toDouble(),
-                        latitude = 43.602 + lastIndex.toDouble() * 0.01,
-                        longitude = 1.453 + lastIndex.toDouble() * 0.01,
-                        sync = false
-                    )
-                    dangerReportsViewModel.addLocalReports(
-                        listOf(report)
-                    )
-                    activity.runOnUiThread {
-                        Toast.makeText(activity, R.string.error_creating_report, Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-
-                val danger = dangerReportsViewModel.getDangerClassification()
-
-                val responseCode = danger.getDangerCode(report)
-
-                // Write characteristic (to activate the buzzer, etc)
-                peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)
-                    ?.let { it2 ->
-                        // Verify it has the write with response property
-                        if (it2.supportsWritingWithResponse()) {
-                            scope.launch(Dispatchers.IO) {
-                                peripheral.writeCharacteristic(
-                                    it2,
-                                    responseCode.toByteArray(),
-                                    WriteType.WITH_RESPONSE
-                                )
-                            }
+                        report = LocalReport(
+                            timestamp = timestamp,
+                            distance = json.getDouble("distance"),
+                            objectSpeed = json.getDouble("object_speed"),
+                            bicycleSpeed = 5.0 + lastIndex.toDouble(),
+                            latitude = 43.602 + lastIndex.toDouble() * 0.01,
+                            longitude = 1.453 + lastIndex.toDouble() * 0.01,
+                            sync = false
+                        )
+                        dangerReportsViewModel.addLocalReports(
+                            listOf(report)
+                        )
+                        activity.runOnUiThread {
+                            Toast.makeText(activity, R.string.error_creating_report, Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
+
+                    val danger = dangerReportsViewModel.getDangerClassification()
+
+                    val responseCode = danger.getDangerCode(report)
+
+                    // Write characteristic (to activate the buzzer, etc)
+                    peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)
+                        ?.let { it2 ->
+                            // Verify it has the write with response property
+                            if (it2.supportsWritingWithResponse()) {
+                                scope.launch(Dispatchers.IO) {
+                                    peripheral.writeCharacteristic(
+                                        it2,
+                                        responseCode.toByteArray(),
+                                        WriteType.WITH_RESPONSE
+                                    )
+                                }
+                            }
+                        }
+                } catch (e: Exception) {
+                    Log.w(TAG,"Received wrong messages")
+                }
             }
         }
     }
