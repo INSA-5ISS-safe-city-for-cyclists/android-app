@@ -115,7 +115,7 @@ class Location(
         if (checkPermissions()) {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
-                2000,
+                1000,
                 0f,
                 locationListener
             )
