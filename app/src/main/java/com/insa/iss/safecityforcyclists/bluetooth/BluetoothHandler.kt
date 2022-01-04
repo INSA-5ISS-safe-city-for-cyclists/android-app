@@ -1,34 +1,32 @@
 package com.insa.iss.safecityforcyclists.bluetooth
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
+import com.insa.iss.safecityforcyclists.location.Location
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
+import com.mapbox.mapboxsdk.location.permissions.PermissionsManager
 import com.welie.blessed.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.json.JSONTokener
 import java.nio.ByteOrder
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.*
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
-import android.content.Intent
-import android.location.LocationManager
-import android.view.View
-import androidx.activity.result.ActivityResultLauncher
-import com.google.android.material.snackbar.Snackbar
-import com.insa.iss.safecityforcyclists.location.Location
-import com.mapbox.mapboxsdk.location.permissions.PermissionsManager
-import java.lang.Exception
 
 
 internal class BluetoothHandler private constructor(
@@ -329,20 +327,8 @@ internal class BluetoothHandler private constructor(
                 Log.d(TAG, sensorValue)
 
                 // Parse JSON
-
                 val json = JSONTokener(sensorValue).nextValue() as JSONObject
-
-                // TODO change date format to dd/MM/yyyy on the ESP
-                val formatter = DateTimeFormatter.ofPattern("d/MM/yyyy", Locale.getDefault())
-                val date = LocalDate.parse(json.getString("date"), formatter)
-
-                val timestamp =
-                    json.getLong("timestamp") / 1000 + date.atStartOfDay(ZoneId.systemDefault())
-                        .toEpochSecond()
-
-//                Log.d(TAG, timestamp.toString())
-//                Log.d(TAG, DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochSecond(timestamp)))
-
+                val timestamp = Date().time / 1000
                 // Add report
                 val report: LocalReport
 
@@ -377,6 +363,9 @@ internal class BluetoothHandler private constructor(
                         latitude = 43.602 + lastIndex.toDouble() * 0.01,
                         longitude = 1.453 + lastIndex.toDouble() * 0.01,
                         sync = false
+                    )
+                    dangerReportsViewModel.addLocalReports(
+                        listOf(report)
                     )
                     activity.runOnUiThread {
                         Toast.makeText(activity, R.string.error_creating_report, Toast.LENGTH_SHORT)
