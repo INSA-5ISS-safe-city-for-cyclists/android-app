@@ -33,11 +33,13 @@ class DangerZonesViewModel(application: Application) : AndroidViewModel(applicat
                 if (onlyDangerousZones) {
                     Constants.API_ZONES_ENDPOINT + "?dangerous=true"
                 } else {
-                    Constants.API_ZONES_ENDPOINT
+                    // TODO Remove this line used to show all zone (time_filter = false)
+                    Constants.API_ZONES_ENDPOINT + "?time_filter=false"
                 }
             } else {
                 "https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson"
             }
+            println(url)
             try {
                 return@withContext FeatureCollection.fromJson(URL(url).readText())
             } catch (e: Exception) {
