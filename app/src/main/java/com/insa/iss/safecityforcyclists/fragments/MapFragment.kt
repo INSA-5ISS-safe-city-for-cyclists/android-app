@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.*
+import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.MainActivity
 import com.insa.iss.safecityforcyclists.R
@@ -153,6 +155,25 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 }
             }
         })
+
+        val dateButton = view.findViewById<ImageButton>(R.id.dateButton)
+        val dateChip = view.findViewById<Chip>(R.id.dateChip)
+        dateButton.setOnClickListener {
+            val timePicker = TimePickerFragment { _, hour, minute ->
+                run {
+                    dateChip.visibility = View.VISIBLE
+                    val time = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                    dateChip.text = time
+                    dangerZonesViewModel.selectedTime = time
+
+                }
+            }
+            timePicker.show(requireActivity().supportFragmentManager, "timePicker")
+        }
+        dateChip.setOnClickListener {
+            dateChip.visibility = View.INVISIBLE
+            dangerZonesViewModel.selectedTime = null
+        }
     }
 
     private fun setupMap(view: View, savedInstanceState: Bundle?) {
@@ -166,7 +187,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 // Update attributions position
                 map.uiSettings.attributionGravity = Gravity.TOP
                 map.uiSettings.setAttributionMargins(15, 250, 0, 0)
-                map.uiSettings.setCompassMargins(0, 250, 50, 0)
+                map.uiSettings.setCompassMargins(0, 300, 50, 0)
                 map.setMaxZoomPreference(20.0)
 
                 addSymbolImages(style)
