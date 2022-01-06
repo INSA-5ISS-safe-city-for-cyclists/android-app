@@ -230,6 +230,8 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 debugDatabaseFragment?.let {
                     it.mapboxMap = map
                 }
+
+                bluetoothHandler.mapboxMap = map
             }
         }
         routeViewModel.routeGeoJson.observe(viewLifecycleOwner, { routeGeoJson ->
