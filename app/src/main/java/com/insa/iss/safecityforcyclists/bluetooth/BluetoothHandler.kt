@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.insa.iss.safecityforcyclists.R
@@ -145,15 +146,26 @@ internal class BluetoothHandler private constructor(
                             LocationManager.GPS_PROVIDER
                         ) || location.lastLocation == null
                     ) {
-                        val snackbar = Snackbar.make(
-                            bleButton.rootView,
-                            "La localisation n'est pas active, voulez-vous continuer?",
-                            Snackbar.LENGTH_LONG
-                        )
-                        snackbar.setAction("Continuer") {
-                            onContinue()
-                        }
-                        snackbar.show()
+//                        val snackbar = Snackbar.make(
+//                            bleButton.rootView,
+//                            R.string.ble_localisation_disabled,
+//                            Snackbar.LENGTH_LONG
+//                        )
+//                        snackbar.setAction(R.string.ble_localisation_disabled_validate) {
+//                            onContinue()
+//                        }
+//                        snackbar.show()
+                        MaterialAlertDialogBuilder(activity)
+                            .setTitle(R.string.ble_localisation_disabled_title)
+                            .setMessage(R.string.ble_localisation_disabled)
+                            .setNeutralButton(R.string.ble_localisation_disabled_cancel) { _, _ ->
+                                // Respond to neutral button press
+                            }
+                            .setPositiveButton(R.string.ble_localisation_disabled_validate) { _, _ ->
+                                // Respond to positive button press
+                                onContinue()
+                            }
+                            .show()
                     } else {
                         onContinue()
                     }
