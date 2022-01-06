@@ -177,8 +177,9 @@ internal class BluetoothHandler private constructor(
 //                ).show()
                 // Disconnection
                 scope.launch {
-                    onDeviceDisconnected()
-                    connectedDevice?.let { it1 -> central?.cancelConnection(it1) }
+                    if (connectedDevice != null) {
+                        central?.cancelConnection(connectedDevice!!)
+                    }
                 }
             }
         }
