@@ -22,4 +22,8 @@
     <string name="disable_debug">Disable Debug</string>
     <string name="enable_dangerous_zones">Only Dangerous zones</string>
     <string name="disable_dangerous_zones">All zones</string>
+    <string name="ble_localisation_disabled_title">"Activation du BLE"</string>
+    <string name="ble_localisation_disabled">"La localisation n'est pas active, les rapports ne pourront pas être crées\nVoulez-vous continuer?"</string>
+    <string name="ble_localisation_disabled_cancel">Annuler</string>
+    <string name="ble_localisation_disabled_validate">Continuer</string>
 </resources>

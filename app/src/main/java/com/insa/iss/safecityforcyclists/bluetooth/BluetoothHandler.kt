@@ -11,13 +11,14 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
 import com.insa.iss.safecityforcyclists.location.Location
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 import com.mapbox.mapboxsdk.location.permissions.PermissionsManager
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.welie.blessed.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -121,6 +122,10 @@ internal class BluetoothHandler private constructor(
     private var connected = false
     private var connectedDevice: BluetoothPeripheral? = null
 
+    // Only for debug
+
+    var mapboxMap: MapboxMap? = null
+
     init {
         if (bluetoothAdapter == null) {
             Toast.makeText(activity, R.string.bluetooth_not_supported, Toast.LENGTH_SHORT).show()
@@ -145,15 +150,26 @@ internal class BluetoothHandler private constructor(
                             LocationManager.GPS_PROVIDER
                         ) || location.lastLocation == null
                     ) {
-                        val snackbar = Snackbar.make(
-                            bleButton.rootView,
-                            "La localisation n'est pas active, voulez-vous continuer?",
-                            Snackbar.LENGTH_LONG
-                        )
-                        snackbar.setAction("Continuer") {
-                            onContinue()
-                        }
-                        snackbar.show()
+//                        val snackbar = Snackbar.make(
+//                            bleButton.rootView,
+//                            R.string.ble_localisation_disabled,
+//                            Snackbar.LENGTH_LONG
+//                        )
+//                        snackbar.setAction(R.string.ble_localisation_disabled_validate) {
+//                            onContinue()
+//                        }
+//                        snackbar.show()
+                        MaterialAlertDialogBuilder(activity)
+                            .setTitle(R.string.ble_localisation_disabled_title)
+                            .setMessage(R.string.ble_localisation_disabled)
+                            .setNeutralButton(R.string.ble_localisation_disabled_cancel) { _, _ ->
+                                // Respond to neutral button press
+                            }
+                            .setPositiveButton(R.string.ble_localisation_disabled_validate) { _, _ ->
+                                // Respond to positive button press
+                                onContinue()
+                            }
+                            .show()
                     } else {
                         onContinue()
                     }
@@ -167,18 +183,11 @@ internal class BluetoothHandler private constructor(
                     bleButton.setImageDrawable(bleOffDrawable)
                 }
             } else {
-//                Toast.makeText(
-//                    activity,
-//                    activity.resources.getString(
-//                        R.string.ble_already_connected,
-//                        connectedDevice?.name
-//                    ),
-//                    Toast.LENGTH_SHORT
-//                ).show()
                 // Disconnection
                 scope.launch {
-                    onDeviceDisconnected()
-                    connectedDevice?.let { it1 -> central?.cancelConnection(it1) }
+                    if (connectedDevice != null) {
+                        central?.cancelConnection(connectedDevice!!)
+                    }
                 }
             }
         }
@@ -362,13 +371,22 @@ internal class BluetoothHandler private constructor(
                             lastIndex = 0
                         }
 
+                        var latitude = 43.602 + lastIndex.toDouble() * 0.01
+                        var longitude = mapboxMap?.cameraPosition?.target?.latitude
+                            ?: 1.453 + lastIndex.toDouble() * 0.01
+
+                        mapboxMap?.let {
+                            latitude = it.cameraPosition.target.latitude
+                            longitude = it.cameraPosition.target.longitude
+                        }
+
                         report = LocalReport(
                             timestamp = timestamp,
                             distance = json.getDouble("distance"),
                             objectSpeed = json.getDouble("object_speed"),
-                            bicycleSpeed = 5.0 + lastIndex.toDouble(),
-                            latitude = 43.602 + lastIndex.toDouble() * 0.01,
-                            longitude = 1.453 + lastIndex.toDouble() * 0.01,
+                            bicycleSpeed = 0.0 + lastIndex.toDouble(),
+                            latitude = latitude,
+                            longitude = longitude,
                             sync = false
                         )
                         dangerReportsViewModel.addLocalReports(
@@ -384,29 +402,29 @@ internal class BluetoothHandler private constructor(
                         }
                     }
 
-                    val danger = dangerReportsViewModel.getDangerClassification()
+                val danger = dangerReportsViewModel.getDangerClassification()
 
-                    val responseCode = danger.getDangerCode(report)
+                val responseCode = danger.getDangerCode(report)
 
-                    // Write characteristic (to activate the buzzer, etc)
-                    peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)
-                        ?.let { it2 ->
-                            // Verify it has the write with response property
-                            if (it2.supportsWritingWithResponse()) {
-                                scope.launch(Dispatchers.IO) {
-                                    peripheral.writeCharacteristic(
-                                        it2,
-                                        responseCode.toByteArray(),
-                                        WriteType.WITH_RESPONSE
-                                    )
-                                }
+                // Write characteristic (to activate the buzzer, etc)
+                peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)
+                    ?.let { it2 ->
+                        // Verify it has the write with response property
+                        if (it2.supportsWritingWithResponse()) {
+                            scope.launch(Dispatchers.IO) {
+                                peripheral.writeCharacteristic(
+                                    it2,
+                                    responseCode.toByteArray(),
+                                    WriteType.WITH_RESPONSE
+                                )
                             }
                         }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Received wrong messages")
-                }
-            }
+                    }
+            } catch (e: Exception) {
+            Log.w(TAG, "Received wrong messages")
+        }
         }
     }
+}
 
 }
