@@ -136,6 +136,10 @@ class MapFragment : Fragment(R.layout.map_fragment) {
            openUploadModal()
         }
 
+        dangerReportsViewModel.getFeatures().observe(viewLifecycleOwner, {
+            uploadFAB?.isEnabled = !it?.features().isNullOrEmpty()
+        })
+
         searchResultsViewModel.selected.observe(viewLifecycleOwner, { selected ->
             println("selection changed to $selected")
             println("selected item: ${selected?.let { searchResultsViewModel.dataSet.value?.get(it) }}")
