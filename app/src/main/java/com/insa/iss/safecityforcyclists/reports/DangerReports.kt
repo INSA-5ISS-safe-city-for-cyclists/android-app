@@ -21,7 +21,8 @@ class DangerReports(
     private val viewModel: DangerReportsViewModel
 ) {
     companion object {
-        const val ICON_SIZE = 1f
+        const val CLUSTER_LAYER_ID_BASE = "reports_cluster_"
+        const val REPORT_COUNT_LAYER_ID = "reports_count"
     }
 
     init {
@@ -116,7 +117,7 @@ class DangerReports(
         )
         for (i in layers.indices) {
             //Add clusters' circles
-            val circles = CircleLayer("reports_cluster_$i", LOCAL_REPORTS_ID)
+            val circles = CircleLayer("$CLUSTER_LAYER_ID_BASE$i", LOCAL_REPORTS_ID)
             circles.setProperties(
                 circleColor(layers[i][2]),
                 circleRadius(layers[i][1].toFloat())
@@ -138,7 +139,7 @@ class DangerReports(
         }
 
         //Add the count labels
-        val count = SymbolLayer("reports_count", LOCAL_REPORTS_ID)
+        val count = SymbolLayer(REPORT_COUNT_LAYER_ID, LOCAL_REPORTS_ID)
         count.setProperties(
             textField(toString(get("point_count"))),
             textSize(12f),

@@ -187,7 +187,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 // Update attributions position
                 map.uiSettings.attributionGravity = Gravity.TOP
                 map.uiSettings.setAttributionMargins(15, 250, 0, 0)
-                map.uiSettings.setCompassMargins(0, 300, 50, 0)
+                map.uiSettings.setCompassMargins(0, 350, 24, 0)
                 map.setMaxZoomPreference(20.0)
 
                 addSymbolImages(style)

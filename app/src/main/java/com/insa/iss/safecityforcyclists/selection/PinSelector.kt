@@ -4,11 +4,11 @@ import android.graphics.PointF
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
 import com.insa.iss.safecityforcyclists.MainActivity
-import com.insa.iss.safecityforcyclists.fragments.DangerReportBottomSheetDialog
-import com.insa.iss.safecityforcyclists.fragments.MapFragment
-import com.insa.iss.safecityforcyclists.fragments.WaypointBottomSheetDialog
+import com.insa.iss.safecityforcyclists.fragments.*
+import com.insa.iss.safecityforcyclists.reports.DangerReports
 import com.insa.iss.safecityforcyclists.routing.Routing
 import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -16,12 +16,13 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.*
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 
 class PinSelector(
     private val activity: FragmentActivity,
     mapView: MapView,
     private val mapboxMap: MapboxMap,
-    style: Style,
+    private val style: Style,
     private val routing: Routing?,
     private val symbolManager: SymbolManager?
 ) {
@@ -70,31 +71,60 @@ class PinSelector(
         // Get the clicked point coordinates
         val screenPoint: PointF = map.projection.toScreenLocation(point)
         // Query the source layer in that location
-        val remoteReportsFeatures: List<Feature> =
+        val individualReportsFeatures: List<Feature> =
             map.queryRenderedFeatures(
                 screenPoint,
-                MapFragment.REMOTE_REPORTS_ID,
                 MapFragment.LOCAL_REPORTS_ID,
                 MapFragment.LOCAL_REPORTS_UNSYNC_ID
             )
-        println(remoteReportsFeatures)
-        if (remoteReportsFeatures.isNotEmpty()) {
-            val feature: Feature = remoteReportsFeatures[0]
+        if (individualReportsFeatures.isNotEmpty()) {
+            // First try to click on an individual report
+            val feature: Feature = individualReportsFeatures[0]
             showReportModal(feature)
         } else {
-            val features: List<Feature> =
+            // Then try to show cluster leaves
+            val clusteredReportsFeatures: List<Feature> =
                 map.queryRenderedFeatures(
                     screenPoint,
-                    "poi-level-3",
-                    "poi-level-2",
-                    "poi-level-1",
-                    "poi-railway"
+                    DangerReports.REPORT_COUNT_LAYER_ID
                 )
-            if (features.isNotEmpty()) {
-                val feature: Feature = features[0]
-                showWaypointModal(feature)
+            if (clusteredReportsFeatures.isNotEmpty()) {
+                val cluster: Feature = clusteredReportsFeatures[0]
+                val clusterSource = style.getSourceAs<GeoJsonSource>(MapFragment.LOCAL_REPORTS_ID)
+                clusterSource?.let {
+                    val clusterLeaves = it.getClusterLeaves(cluster, Long.MAX_VALUE, 0)
+                    openClusterLeavesModal(clusterLeaves)
+                }
+            } else {
+                // Finally try to get a POI
+                val features: List<Feature> =
+                    map.queryRenderedFeatures(
+                        screenPoint,
+                        "poi-level-3",
+                        "poi-level-2",
+                        "poi-level-1",
+                        "poi-railway"
+                    )
+                if (features.isNotEmpty()) {
+                    val feature: Feature = features[0]
+                    showWaypointModal(feature)
+                }
             }
         }
+    }
+
+    private fun openClusterLeavesModal(clusterLeaves: FeatureCollection) {
+        val bottomSheet = ClusterLeavesBottomSheetDialog(clusterLeaves) { sheet, item, position ->
+            println("Pressed $item at position $position")
+            showReportModal(item, {
+                openClusterLeavesModal(clusterLeaves)
+            }, false)
+            sheet.dismiss()
+        }
+        bottomSheet.show(
+            activity.supportFragmentManager,
+            "ModalBottomSheet"
+        )
     }
 
     private fun onMapLongClick(point: LatLng) {

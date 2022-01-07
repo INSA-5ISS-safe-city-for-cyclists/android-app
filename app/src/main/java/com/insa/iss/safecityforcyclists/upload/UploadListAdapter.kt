@@ -1,6 +1,8 @@
 package com.insa.iss.safecityforcyclists.upload
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.insa.iss.safecityforcyclists.R
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
+import java.util.*
 
 class UploadListAdapter: RecyclerView.Adapter<UploadListAdapter.ViewHolder>() {
 
@@ -27,6 +30,7 @@ class UploadListAdapter: RecyclerView.Adapter<UploadListAdapter.ViewHolder>() {
             val uploadItemTitle: TextView = view.findViewById(R.id.uploadItemTitle)
             val uploadItemSubtitle: TextView = view.findViewById(R.id.uploadItemSubtitle)
             val uploadItemContainer: ConstraintLayout = view.findViewById(R.id.uploadItemContainer)
+            var context: Context = view.context
         }
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -43,8 +47,14 @@ class UploadListAdapter: RecyclerView.Adapter<UploadListAdapter.ViewHolder>() {
                     println("item: $item")
                     val p = (item.geometry() as Point)
                     val prop = item.properties()
-                    viewHolder.uploadItemTitle.text = "Coordinates: [${p.latitude()}, ${p.longitude()}]"
-                    viewHolder.uploadItemSubtitle.text = "Object speed: ${prop?.get("object_speed")?.asString} | Distance: ${prop?.get("distance")?.asString}"
+
+                    viewHolder.uploadItemTitle.text = "ERROR: Could not retrieve time"
+                    prop?.get("timestamp")?.asLong?.let {
+                        val date = Date()
+                        date.time = it * 1000
+                        viewHolder.uploadItemTitle.text = DateFormat.getLongDateFormat(viewHolder.context).format(date) + ", " + DateFormat.getTimeFormat(viewHolder.context).format(date)
+                    }
+                    viewHolder.uploadItemSubtitle.text = "[${p.latitude()}, ${p.longitude()}]"
                     viewHolder.uploadItemContainer.setOnClickListener {
                         println("pressed $item")
                         onItemPressedCallback?.invoke(item, position)
