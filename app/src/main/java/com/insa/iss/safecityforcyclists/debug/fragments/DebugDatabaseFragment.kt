@@ -9,6 +9,7 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
+import com.insa.iss.safecityforcyclists.location.Location
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 import com.insa.iss.safecityforcyclists.reports.DangerZonesViewModel
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -28,6 +29,7 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
             field = value
             setViewVisible(value)
         }
+    var location: Location? = null
 
     private fun setViewVisible(visible: Boolean) {
         container?.visibility = if (visible) {
@@ -62,13 +64,17 @@ class DebugDatabaseFragment : Fragment(R.layout.database_debug) {
         // Add dummy report in the center of the screen
         view.findViewById<FloatingActionButton>(R.id.quickAddFAB).setOnClickListener {
             mapboxMap?.let {
+                var bicycleSpeed: Double = 20.0
+                if (location?.lastLocation != null) {
+                    bicycleSpeed = location?.lastLocation!!.speed.toDouble()
+                }
                 dangerReportsViewModel.addLocalReports(
                     listOf(
                         LocalReport(
                             timestamp = Date().time / 1000,
                             distance = 50.0, // cm
                             objectSpeed = 50.0, // km/h
-                            bicycleSpeed = 20.0, // km/h
+                            bicycleSpeed = bicycleSpeed, // km/h
                             latitude = it.cameraPosition.target.latitude,
                             longitude = it.cameraPosition.target.longitude,
                             sync = false

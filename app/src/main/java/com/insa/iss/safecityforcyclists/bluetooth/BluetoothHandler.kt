@@ -16,6 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
 import com.insa.iss.safecityforcyclists.database.LocalReport
 import com.insa.iss.safecityforcyclists.location.Location
+import com.insa.iss.safecityforcyclists.reports.DangerClassification
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
 import com.mapbox.mapboxsdk.location.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -348,6 +349,9 @@ internal class BluetoothHandler private constructor(
                     // Add report
                     val report: LocalReport
 
+                    val danger = dangerReportsViewModel.getDangerClassification()
+                    var responseCode = "0"
+
                     if (location.lastLocation != null) {
                         report = LocalReport(
                             timestamp = timestamp,
@@ -358,11 +362,15 @@ internal class BluetoothHandler private constructor(
                             longitude = location.lastLocation!!.longitude,
                             sync = false
                         )
-                        dangerReportsViewModel.addLocalReports(
-                            listOf(report)
-                        )
+                        responseCode = danger.getDangerCode(report)
+                        if (responseCode === DangerClassification.dangerCode) {
+                            dangerReportsViewModel.addLocalReports(
+                                listOf(report)
+                            )
+                        }
                     } else {
                         // TODO remove these lines (BLE => local reports)
+
                         // Used to test and see the points on the map
 
                         var lastIndex =
@@ -389,9 +397,15 @@ internal class BluetoothHandler private constructor(
                             longitude = longitude,
                             sync = false
                         )
-                        dangerReportsViewModel.addLocalReports(
-                            listOf(report)
-                        )
+                        responseCode = danger.getDangerCode(report)
+                        if (responseCode === DangerClassification.dangerCode) {
+                            dangerReportsViewModel.addLocalReports(
+                                listOf(report)
+                            )
+                        }
+
+                        // Keep this line
+
                         activity.runOnUiThread {
                             Toast.makeText(
                                 activity,
@@ -401,10 +415,6 @@ internal class BluetoothHandler private constructor(
                                 .show()
                         }
                     }
-
-                val danger = dangerReportsViewModel.getDangerClassification()
-
-                val responseCode = danger.getDangerCode(report)
 
                 // Write characteristic (to activate the buzzer, etc)
                 peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)

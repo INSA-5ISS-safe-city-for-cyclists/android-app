@@ -9,6 +9,8 @@ class DangerClassification(jsonObject: JSONObject?) {
     companion object {
         const val defaultMaxDistance = 200.0
         const val defaultMinSpeed = 30.0
+        const val defaultMinDistanceThreshold = 50.0
+        const val defaultMinSpeedThreshold = 5.0
 
         const val dangerCode = "1"
         const val safeCode = "0"
@@ -17,6 +19,10 @@ class DangerClassification(jsonObject: JSONObject?) {
     var maxDistance: Double = defaultMaxDistance
         private set
     var minSpeed: Double = defaultMinSpeed
+        private set
+    var minDistanceThreshold: Double = defaultMinDistanceThreshold
+        private set
+    var minSpeedThreshold: Double = defaultMinSpeedThreshold
         private set
 
     init {
@@ -39,6 +45,24 @@ class DangerClassification(jsonObject: JSONObject?) {
                     defaultMinSpeed
                 }
             }
+            jsonObject?.getDouble("min_distance_threshold")?.let {
+                minDistanceThreshold = if (it != NULL) {
+                    println("Found min distance threshold : $it")
+                    it
+                } else {
+                    println("Using default min distance threshold : $defaultMinDistanceThreshold")
+                    defaultMinDistanceThreshold
+                }
+            }
+            jsonObject?.getDouble("min_speed_threshold")?.let {
+                minSpeedThreshold = if (it != NULL) {
+                    println("Found min speed threshold : $it")
+                    it
+                } else {
+                    println("Using default min speed threshold : $defaultMinSpeedThreshold")
+                    defaultMinSpeedThreshold
+                }
+            }
         } catch (e: JSONException) {
             println(e)
         }
@@ -46,7 +70,8 @@ class DangerClassification(jsonObject: JSONObject?) {
 
     private fun isDangerous(report: LocalReport): Boolean {
         val relativeSpeed = report.objectSpeed - report.bicycleSpeed
-        return (relativeSpeed >= minSpeed || report.distance <= maxDistance)
+        return relativeSpeed >= minSpeedThreshold && report.distance >= minDistanceThreshold &&
+                (relativeSpeed >= minSpeed || report.distance <= maxDistance)
     }
 
     fun getDangerCode(report: LocalReport): String {
