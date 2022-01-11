@@ -233,6 +233,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
 
                 debugDatabaseFragment?.let {
                     it.mapboxMap = map
+                    it.location = location
                 }
 
                 bluetoothHandler.mapboxMap = map

@@ -9,6 +9,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.location.LocationListener
 import android.location.LocationManager
+import android.location.LocationProvider
+import android.location.LocationRequest
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
@@ -77,6 +80,22 @@ class Location(
         override fun onProviderDisabled(provider: String) {}
     }
 
+    private val centerLocationListener: LocationListener = object : LocationListener {
+
+        override fun onLocationChanged(location: android.location.Location) {
+            locationComponent?.cameraMode = CameraMode.TRACKING
+            locationManager.removeUpdates(this)
+        }
+
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
+            locationComponent?.cameraMode = CameraMode.TRACKING
+            locationManager.removeUpdates(this)
+        }
+
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
+    }
+
     @SuppressLint("MissingPermission")
     fun enableLocationComponent() {
         // Get an instance of the component
@@ -127,9 +146,10 @@ class Location(
                 if (lastLocation != null) {
                     locationComponent?.cameraMode = CameraMode.TRACKING
                 } else {
-                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, {
-                        locationComponent?.cameraMode = CameraMode.TRACKING
-                    }, null)
+                    locationManager.requestSingleUpdate(
+                        LocationManager.GPS_PROVIDER,
+                        centerLocationListener, null
+                    )
                     Toast.makeText(activity, "Location unknown, searching...", Toast.LENGTH_SHORT)
                         .show()
                 }
