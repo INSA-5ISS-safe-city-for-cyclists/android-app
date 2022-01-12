@@ -105,7 +105,11 @@ class DangerReportsViewModel(application: Application) : AndroidViewModel(applic
     private suspend fun getUnsyncedReports(): List<LocalReport>? {
         return withContext(Dispatchers.IO) {
             return@withContext db?.localReportDao()?.getUnsyncedReports(
-                dangerClassification.maxDistance, dangerClassification.minSpeed)
+                dangerClassification.minSpeed0_1,
+                dangerClassification.minSpeed1_2,
+                dangerClassification.maxDistance0,
+                dangerClassification.maxDistance1,
+                dangerClassification.maxDistance2)
         }
     }
 

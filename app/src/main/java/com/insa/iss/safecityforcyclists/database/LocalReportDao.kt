@@ -9,8 +9,14 @@ interface LocalReportDao {
     @Query("SELECT * FROM local_reports")
     fun getReports(): List<LocalReport>
 
-    @Query("SELECT * FROM local_reports WHERE sync = 0 AND (distance < :maxDistance OR (object_speed - bicycle_speed) > :minSpeed)")
-    fun getUnsyncedReports(maxDistance: Double, minSpeed: Double): List<LocalReport>
+    @Query("SELECT * FROM local_reports WHERE sync = 0 AND (distance <= :maxDistance0 OR (distance <= :maxDistance1 AND (object_speed - bicycle_speed) > :minSpeed0_1) OR (distance <= :maxDistance2 AND (object_speed - bicycle_speed) > :minSpeed1_2))")
+    fun getUnsyncedReports(
+        minSpeed0_1: Double,
+        minSpeed1_2: Double,
+        maxDistance0: Double,
+        maxDistance1: Double,
+        maxDistance2: Double
+    ): List<LocalReport>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertReports(reports: List<LocalReport>)
