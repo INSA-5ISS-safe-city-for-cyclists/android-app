@@ -356,7 +356,7 @@ internal class BluetoothHandler private constructor(
                         report = LocalReport(
                             timestamp = timestamp,
                             distance = json.getDouble("distance"),
-                            objectSpeed = json.getDouble("object_speed"),
+                            objectSpeed = json.getDouble("object_speed")+location.lastLocation!!.speed.toDouble(),
                             bicycleSpeed = location.lastLocation!!.speed.toDouble(),
                             latitude = location.lastLocation!!.latitude,
                             longitude = location.lastLocation!!.longitude,
