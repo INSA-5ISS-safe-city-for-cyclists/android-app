@@ -8,7 +8,6 @@ import com.insa.iss.safecityforcyclists.fragments.*
 import com.insa.iss.safecityforcyclists.reports.DangerReports
 import com.insa.iss.safecityforcyclists.routing.Routing
 import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -70,7 +69,15 @@ class PinSelector(
     private fun onMapClick(map: MapboxMap, point: LatLng) {
         // Get the clicked point coordinates
         val screenPoint: PointF = map.projection.toScreenLocation(point)
-        // Query the source layer in that location
+        // Select report, then cluster, then poi
+        if (!selectReport(map, screenPoint)) {
+            if (!selectCluster(map, screenPoint)) {
+                selectPOI(map, screenPoint)
+            }
+        }
+    }
+
+    private fun selectReport(map: MapboxMap, screenPoint: PointF): Boolean {
         val individualReportsFeatures: List<Feature> =
             map.queryRenderedFeatures(
                 screenPoint,
@@ -81,43 +88,57 @@ class PinSelector(
             // First try to click on an individual report
             val feature: Feature = individualReportsFeatures[0]
             showReportModal(feature)
-        } else {
-            // Then try to show cluster leaves
-            val clusteredReportsFeatures: List<Feature> =
-                map.queryRenderedFeatures(
-                    screenPoint,
-                    DangerReports.REPORT_COUNT_LAYER_ID
-                )
-            if (clusteredReportsFeatures.isNotEmpty()) {
-                val cluster: Feature = clusteredReportsFeatures[0]
-                val clusterSource = style.getSourceAs<GeoJsonSource>(MapFragment.LOCAL_REPORTS_ID)
-                clusterSource?.let {
-                    val clusterLeaves = it.getClusterLeaves(cluster, Long.MAX_VALUE, 0)
-                    openClusterLeavesModal(clusterLeaves)
-                }
-            } else {
-                // Finally try to get a POI
-                val features: List<Feature> =
-                    map.queryRenderedFeatures(
-                        screenPoint,
-                        "poi-level-3",
-                        "poi-level-2",
-                        "poi-level-1",
-                        "poi-railway"
-                    )
-                if (features.isNotEmpty()) {
-                    val feature: Feature = features[0]
-                    showWaypointModal(feature)
-                }
-            }
+            return true
         }
+        return false
     }
 
-    private fun openClusterLeavesModal(clusterLeaves: FeatureCollection) {
+    private fun selectCluster(map: MapboxMap, screenPoint: PointF): Boolean {
+        val clusteredReportsFeatures: List<Feature> =
+            map.queryRenderedFeatures(
+                screenPoint,
+                DangerReports.REPORT_COUNT_LAYER_ID
+            )
+        if (clusteredReportsFeatures.isNotEmpty()) {
+            val cluster: Feature = clusteredReportsFeatures[0]
+            val clusterSource = style.getSourceAs<GeoJsonSource>(MapFragment.LOCAL_REPORTS_ID)
+            clusterSource?.let {
+                val clusterLeaves = clusterSource.getClusterLeaves(cluster, Long.MAX_VALUE, 0).features()
+                clusterLeaves?.let {
+                    openClusterLeavesModal(it)
+                }
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun selectPOI(map: MapboxMap, screenPoint: PointF): Boolean {
+        val features: List<Feature> =
+            map.queryRenderedFeatures(
+                screenPoint,
+                "poi-level-3",
+                "poi-level-2",
+                "poi-level-1",
+                "poi-railway"
+            )
+        if (features.isNotEmpty()) {
+            val feature: Feature = features[0]
+            showWaypointModal(feature)
+            return true
+        }
+        return false
+    }
+
+    private fun openClusterLeavesModal(clusterLeaves: List<Feature>) {
         val bottomSheet = ClusterLeavesBottomSheetDialog(clusterLeaves) { sheet, item, position ->
-            println("Pressed $item at position $position")
             showReportModal(item, {
-                openClusterLeavesModal(clusterLeaves)
+                val newLeaves = clusterLeaves.filter {
+                    it.properties()?.get("id")?.equals(item.properties()?.get("id")) == false
+                }
+                if (newLeaves.size > 1) {
+                    openClusterLeavesModal(newLeaves)
+                }
             }, false)
             sheet.dismiss()
         }
@@ -132,7 +153,11 @@ class PinSelector(
         showWaypointModal(feature)
     }
 
-    fun showReportModal(feature: Feature, onDismiss: (() -> Unit)? = null, centerMapOnFeature: Boolean = false) {
+    fun showReportModal(
+        feature: Feature,
+        onDismiss: (() -> Unit)? = null,
+        centerMapOnFeature: Boolean = false
+    ) {
         val p = feature.geometry() as Point
         val point = LatLng(p.latitude(), p.longitude())
         showSelectionCircle(point)
