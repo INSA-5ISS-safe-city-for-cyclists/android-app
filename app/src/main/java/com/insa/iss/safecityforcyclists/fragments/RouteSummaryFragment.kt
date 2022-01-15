@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.transition.Slide
 import android.view.Gravity
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.insa.iss.safecityforcyclists.R
@@ -18,7 +16,6 @@ class RouteSummaryFragment : Fragment(R.layout.route_summary) {
 
     private var timeText: TextView? = null
     private var distanceText: TextView? = null
-    private var navigationButton: Button? = null
     private val routeViewModel: RouteViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +29,6 @@ class RouteSummaryFragment : Fragment(R.layout.route_summary) {
         super.onViewCreated(view, savedInstanceState)
         timeText = view.findViewById(R.id.timeText)
         distanceText = view.findViewById(R.id.distanceText)
-        navigationButton = view.findViewById(R.id.navigationButton)
 
         val properties = routeViewModel.routeGeoJson.value?.features()?.get(0)?.properties()
 
@@ -49,10 +45,6 @@ class RouteSummaryFragment : Fragment(R.layout.route_summary) {
             timeText?.text = timeToString(time)
         } else {
             timeText?.text = "ERROR"
-        }
-
-        navigationButton?.setOnClickListener {
-            Toast.makeText(requireContext(), "Navigation not implemented yet!", Toast.LENGTH_SHORT).show()
         }
     }
 
