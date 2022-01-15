@@ -1,6 +1,7 @@
 package com.insa.iss.safecityforcyclists.selection
 
 import android.graphics.PointF
+import android.graphics.RectF
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
 import com.insa.iss.safecityforcyclists.MainActivity
@@ -69,18 +70,20 @@ class PinSelector(
     private fun onMapClick(map: MapboxMap, point: LatLng) {
         // Get the clicked point coordinates
         val screenPoint: PointF = map.projection.toScreenLocation(point)
+        // Make the selection zone bigger
+        val screenRect = RectF(screenPoint.x - 50, screenPoint.y - 50, screenPoint.x + 50, screenPoint.y + 50)
         // Select report, then cluster, then poi
-        if (!selectReport(map, screenPoint)) {
-            if (!selectCluster(map, screenPoint)) {
-                selectPOI(map, screenPoint)
+        if (!selectReport(map, screenRect)) {
+            if (!selectCluster(map, screenRect)) {
+                selectPOI(map, screenRect)
             }
         }
     }
 
-    private fun selectReport(map: MapboxMap, screenPoint: PointF): Boolean {
+    private fun selectReport(map: MapboxMap, screenRect: RectF): Boolean {
         val individualReportsFeatures: List<Feature> =
             map.queryRenderedFeatures(
-                screenPoint,
+                screenRect,
                 MapFragment.LOCAL_REPORTS_ID,
                 MapFragment.LOCAL_REPORTS_UNSYNC_ID
             )
@@ -93,10 +96,10 @@ class PinSelector(
         return false
     }
 
-    private fun selectCluster(map: MapboxMap, screenPoint: PointF): Boolean {
+    private fun selectCluster(map: MapboxMap, screenRect: RectF): Boolean {
         val clusteredReportsFeatures: List<Feature> =
             map.queryRenderedFeatures(
-                screenPoint,
+                screenRect,
                 DangerReports.REPORT_COUNT_LAYER_ID
             )
         if (clusteredReportsFeatures.isNotEmpty()) {
@@ -113,10 +116,10 @@ class PinSelector(
         return false
     }
 
-    private fun selectPOI(map: MapboxMap, screenPoint: PointF): Boolean {
+    private fun selectPOI(map: MapboxMap, screenRect: RectF): Boolean {
         val features: List<Feature> =
             map.queryRenderedFeatures(
-                screenPoint,
+                screenRect,
                 "poi-level-3",
                 "poi-level-2",
                 "poi-level-1",
