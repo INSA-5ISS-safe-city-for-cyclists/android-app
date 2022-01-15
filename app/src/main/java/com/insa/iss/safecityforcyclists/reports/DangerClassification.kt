@@ -107,7 +107,8 @@ class DangerClassification(jsonObject: JSONObject?) {
 
     private fun isDangerous(report: LocalReport): Boolean {
         val relativeSpeed = abs(report.objectSpeed - report.bicycleSpeed)
-        return relativeSpeed >= minSpeedThreshold && report.distance >= minDistanceThreshold &&
+        val absoluteSpeed = abs(report.objectSpeed);
+        return absoluteSpeed >= minSpeedThreshold && relativeSpeed >= minSpeedThreshold && report.distance >= minDistanceThreshold &&
                 (report.distance <= maxDistance0) ||
                 (report.distance <= maxDistance1 && relativeSpeed >= minSpeed0_1) ||
                 (report.distance <= maxDistance2 && relativeSpeed >= minSpeed1_2)

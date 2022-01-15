@@ -367,6 +367,9 @@ internal class BluetoothHandler private constructor(
                             dangerReportsViewModel.addLocalReports(
                                 listOf(report)
                             )
+                        } else {
+                            println("Ignored following report: ")
+                            println(report)
                         }
                     } else {
                         // TODO remove these lines (BLE => local reports)
