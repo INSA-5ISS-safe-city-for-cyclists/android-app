@@ -14,6 +14,7 @@ import android.location.LocationRequest
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
@@ -50,7 +51,7 @@ class Location(
     private val gpsFixedDrawable =
         ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_baseline_gps_fixed_24, null)
 
-    private var locationComponent: LocationComponent? = null
+    var locationComponent: LocationComponent? = null
     var lastLocation: android.location.Location? = null
         private set
 
@@ -104,6 +105,18 @@ class Location(
         val locationComponentOptions = LocationComponentOptions.builder(activity)
             .trackingGesturesManagement(true)
             .enableStaleState(false)
+            .bearingTintColor(
+                ContextCompat.getColor(
+                    activity,
+                    R.color.user_location_default_color
+                )
+            )
+            .foregroundTintColor(
+                ContextCompat.getColor(
+                    activity,
+                    R.color.user_location_default_color
+                )
+            )
             .build()
 
         locationComponent?.activateLocationComponent(

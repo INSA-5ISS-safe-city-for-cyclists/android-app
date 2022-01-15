@@ -10,7 +10,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.insa.iss.safecityforcyclists.R
@@ -18,6 +20,7 @@ import com.insa.iss.safecityforcyclists.database.LocalReport
 import com.insa.iss.safecityforcyclists.location.Location
 import com.insa.iss.safecityforcyclists.reports.DangerClassification
 import com.insa.iss.safecityforcyclists.reports.DangerReportsViewModel
+import com.mapbox.mapboxsdk.location.LocationComponentOptions
 import com.mapbox.mapboxsdk.location.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.welie.blessed.*
@@ -194,6 +197,45 @@ internal class BluetoothHandler private constructor(
         }
     }
 
+    private fun changeBLEButtonColor(color: Int = R.color.orange_200) {
+        // Change button color
+        var buttonDrawable = bleButton.background
+        buttonDrawable = DrawableCompat.wrap(buttonDrawable)
+        DrawableCompat.setTint(buttonDrawable, ContextCompat.getColor(activity, color))
+        bleButton.background = buttonDrawable
+
+        activity.runOnUiThread {
+            // Change user icon color
+            if (location.locationComponent != null) {
+                if (color != R.color.orange_200) {
+                    location.locationComponent!!.applyStyle(
+                        LocationComponentOptions.builder(activity)
+                            .bearingTintColor(ContextCompat.getColor(activity, color))
+                            .foregroundTintColor(ContextCompat.getColor(activity, color))
+                            .build()
+                    )
+                } else {
+                    location.locationComponent!!.applyStyle(
+                        LocationComponentOptions.builder(activity)
+                            .bearingTintColor(
+                                ContextCompat.getColor(
+                                    activity,
+                                    R.color.user_location_default_color
+                                )
+                            )
+                            .foregroundTintColor(
+                                ContextCompat.getColor(
+                                    activity,
+                                    R.color.user_location_default_color
+                                )
+                            )
+                            .build()
+                    )
+                }
+            }
+        }
+    }
+
     private fun onDeviceDisconnected() {
         connected = false
         connectedDevice = null
@@ -205,6 +247,7 @@ internal class BluetoothHandler private constructor(
                 Toast.LENGTH_SHORT
             ).show()
         }
+        changeBLEButtonColor()
     }
 
     private fun onContinue() {
@@ -241,6 +284,8 @@ internal class BluetoothHandler private constructor(
     }
 
     fun startScanning() {
+        changeBLEButtonColor(R.color.scanning)
+
         scanning = true
         bleButton.setImageDrawable(bleSearchingDrawable)
         Toast.makeText(
@@ -257,14 +302,15 @@ internal class BluetoothHandler private constructor(
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            stopScanning()
+            stopScanning(false)
             connectPeripheral(peripheral)
         }
     }
 
-    private fun stopScanning() {
+    private fun stopScanning(changeColor: Boolean = true) {
         central!!.stopScan()
         scanning = false
+        if (changeColor) changeBLEButtonColor()
     }
 
     private fun connectPeripheral(peripheral: BluetoothPeripheral) {
@@ -291,6 +337,8 @@ internal class BluetoothHandler private constructor(
                 connected = true
                 connectedDevice = peripheral
                 bleButton.setImageDrawable(bleConnectedDrawable)
+
+                changeBLEButtonColor(R.color.connected)
 
                 activity.runOnUiThread {
                     Toast.makeText(
@@ -356,7 +404,7 @@ internal class BluetoothHandler private constructor(
                         report = LocalReport(
                             timestamp = timestamp,
                             distance = json.getDouble("distance"),
-                            objectSpeed = json.getDouble("object_speed")+location.lastLocation!!.speed.toDouble(),
+                            objectSpeed = json.getDouble("object_speed") + location.lastLocation!!.speed.toDouble(),
                             bicycleSpeed = location.lastLocation!!.speed.toDouble(),
                             latitude = location.lastLocation!!.latitude,
                             longitude = location.lastLocation!!.longitude,
@@ -419,25 +467,25 @@ internal class BluetoothHandler private constructor(
                         }
                     }
 
-                // Write characteristic (to activate the buzzer, etc)
-                peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)
-                    ?.let { it2 ->
-                        // Verify it has the write with response property
-                        if (it2.supportsWritingWithResponse()) {
-                            scope.launch(Dispatchers.IO) {
-                                peripheral.writeCharacteristic(
-                                    it2,
-                                    responseCode.toByteArray(),
-                                    WriteType.WITH_RESPONSE
-                                )
+                    // Write characteristic (to activate the buzzer, etc)
+                    peripheral.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID)
+                        ?.let { it2 ->
+                            // Verify it has the write with response property
+                            if (it2.supportsWritingWithResponse()) {
+                                scope.launch(Dispatchers.IO) {
+                                    peripheral.writeCharacteristic(
+                                        it2,
+                                        responseCode.toByteArray(),
+                                        WriteType.WITH_RESPONSE
+                                    )
+                                }
                             }
                         }
-                    }
-            } catch (e: Exception) {
-            Log.w(TAG, "Received wrong messages")
-        }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Received wrong messages")
+                }
+            }
         }
     }
-}
 
 }
